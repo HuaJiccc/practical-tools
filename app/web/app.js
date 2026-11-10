@@ -5426,7 +5426,10 @@
     if (!silent) savePrefs({ settingsTab: name });
     const scroll = $('#scroll');
     if (scroll) scroll.scrollTop = 0;
-    if (name === 'data') refreshUsage();
+    if (name === 'data') {
+      loadDirs();
+      refreshUsage();
+    }
     if (name === 'about') loadDiag();
   }
 
@@ -5444,6 +5447,101 @@
       const hint = $('#autoStartHint');
       if (hint) hint.textContent = res.enabled ? '已加入开机启动，取消勾选即移除' : '随 Windows 启动，不弹黑窗';
     }
+  }
+
+  // ---- v2.6：存储位置（数据目录 / 图片保存目录）----
+
+  async function loadDirs() {
+    const res = await api('dirs_info');
+    if (!res || !res.ok) return;
+    state.dirs = res;
+
+    const setPath = (sel, value) => {
+      const el = $(sel);
+      if (!el) return;
+      el.textContent = value || '—';
+      el.title = value || '';
+    };
+    setPath('#dataPath', res.data_dir);
+    setPath('#exportPath', res.export_dir);
+
+    const setBadge = (sel, custom) => {
+      const el = $(sel);
+      if (!el) return;
+      el.textContent = custom ? '自定义' : '默认';
+      el.classList.toggle('custom', !!custom);
+    };
+    setBadge('#dataBadge', res.data_custom);
+    setBadge('#exportBadge', res.export_custom);
+
+    const hint = $('#dataHint');
+    if (hint) {
+      hint.textContent = res.can_move_data
+        ? '笔记、待办、设置都存在这里'
+        : '程序所在目录不可写，这里改不了';
+    }
+    const dReset = $('#resetData');
+    if (dReset) dReset.hidden = !res.data_custom;
+    const eReset = $('#resetExport');
+    if (eReset) eReset.hidden = !res.export_custom;
+  }
+
+  function restartHint(text) {
+    const hint = $('#dataHint');
+    if (!hint) return;
+    hint.innerHTML = `${text}，重启后生效 <button type="button" class="set-link" id="doRestart">立即重启</button>`;
+    const btn = $('#doRestart');
+    if (!btn) return;
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = '正在重启…';
+      const res = await api('app_restart');
+      if (!res || !res.ok) {
+        btn.disabled = false;
+        btn.textContent = '立即重启';
+        toast((res && res.error) || '重启失败', 'err', 4000);
+      }
+    };
+  }
+
+  async function pickFolder(current) {
+    const picked = await api('pick_folder', current || '');
+    if (!picked || !picked.ok) {
+      if (picked && !picked.cancelled) toast(picked.error || '打不开选择框', 'err', 3600);
+      return null;
+    }
+    return picked.path;
+  }
+
+  async function moveDataDir() {
+    const info = state.dirs || (await api('dirs_info')) || {};
+    const target = await pickFolder(info.data_dir);
+    if (!target) return;
+    const res = await api('data_set_dir', target);
+    if (!res || !res.ok) {
+      toast((res && res.error) || '切换失败', 'err', 4200);
+      return;
+    }
+    await loadDirs();
+    if (!res.restart) {
+      toast('已经在用这个目录了', 'info');
+      return;
+    }
+    const extra = res.copied ? `，已搬 ${res.copied} 个文件过去` : '';
+    restartHint(`已切换${extra}`);
+  }
+
+  async function moveExportDir() {
+    const info = state.dirs || (await api('dirs_info')) || {};
+    const target = await pickFolder(info.export_dir);
+    if (!target) return;
+    const res = await api('export_set_dir', target);
+    if (!res || !res.ok) {
+      toast((res && res.error) || '切换失败', 'err', 4200);
+      return;
+    }
+    await loadDirs();
+    toast('图片以后存到这里', 'ok');
   }
 
   async function refreshUsage() {
@@ -5720,6 +5818,24 @@
       const res = await api('open_data_dir');
       if (!res.ok) toast(res.error || '打开失败', 'err');
     };
+    if ($('#moveData')) $('#moveData').onclick = () => moveDataDir();
+    if ($('#moveExport')) $('#moveExport').onclick = () => moveExportDir();
+    if ($('#resetData')) {
+      $('#resetData').onclick = async () => {
+        const res = await api('data_reset_dir');
+        if (!res || !res.ok) return toast((res && res.error) || '恢复失败', 'err', 3600);
+        await loadDirs();
+        if (res.restart) restartHint('已恢复默认位置');
+      };
+    }
+    if ($('#resetExport')) {
+      $('#resetExport').onclick = async () => {
+        const res = await api('export_reset_dir');
+        if (!res || !res.ok) return toast((res && res.error) || '恢复失败', 'err', 3600);
+        await loadDirs();
+        toast('图片保存目录已恢复默认', 'ok');
+      };
+    }
     if ($('#openExports')) {
       $('#openExports').onclick = async () => {
         const res = await api('open_exports');

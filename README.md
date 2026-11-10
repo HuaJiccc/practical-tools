@@ -100,7 +100,7 @@ app/
   ptools/          核心逻辑（大部分为预编译模块，见下）
   web/             前端：index.html + style.css + app.js，无框架
 assets/            应用图标
-dev/               自测脚本 13 个：功能回归、图片压力测试、打包校验（见 dev/README.md）
+dev/               自测脚本 15 个：功能回归、图片压力测试、打包校验（见 dev/README.md）
 docs/screenshots/  README 用图
 ```
 
@@ -133,6 +133,10 @@ backup/            「备份数据」生成的副本
 ```
 
 换机器直接整个复制 `data/` 即可。
+
+**这两个目录都能改**：「设置 → 数据」里可以分别指定数据目录和图片保存目录，
+默认在 EXE 旁边的 `data`；如果那里不可写（比如装在 `C:\Program Files`），
+会自动退到 `%APPDATA%`，不需要手动配。
 
 ## 更新日志
 

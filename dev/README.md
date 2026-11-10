@@ -22,6 +22,7 @@
 | `dev_image_probe.py` | 图片工具冒烟：一遍走通页面、拖放、编码、保存 |
 | `dev_settings25_ui.py` | 设置页六个分类逐个点开、截图，验证新设置联动 |
 | `dev_settings25_narrow.py` | 窄窗口（1000px）下设置页排版：分类导航转横向页签、内容不溢出 |
+| `dev_dirs26_ui.py` | v2.6：数据 / 图片目录两行的路径、徽章、按钮渲染，含 1000px 窄窗口排版 |
 | `dev_startpage25.py` | 启动页面跨重启是否生效（顺带验证偏好写进了 `data/ui_prefs.json`） |
 | `dev_installed23.py` | 启动**已安装的 exe**，确认图片工具页在打包版里正常渲染 |
 
@@ -31,6 +32,7 @@
 |---|---|
 | `dev_translate_extra.py` | 翻译扩展渠道：本地 mock OpenAI 服务 + 腾讯 TranSmart，以及内置渠道不被影响 |
 | `dev_settings25_api.py` | 设置页后端接口：开机自启 / 占用统计 / 备份 / 诊断信息 |
+| `dev_dirs26.py` | v2.6：目录切换 / 恢复默认 / 拒绝非法路径，**含子进程验证 `data-dir.txt` 真的生效** |
 
 ## 工具
 

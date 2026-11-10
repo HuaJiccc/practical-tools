@@ -1177,6 +1177,45 @@ select {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* v2.6：存储位置的两个目录 */
+.set-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-3);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  vertical-align: 1px;
+}
+.set-badge.custom {
+  background: var(--accent-soft, var(--surface-3));
+  color: var(--accent-ink, var(--text-2));
+}
+.set-note {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.set-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent, #2f6beb);
+  font-size: 11.5px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.set-link:hover { color: var(--accent-hover, #2457c9); }
+.set-link:disabled { color: var(--text-3); cursor: default; text-decoration: none; }
+.set-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 .setting-foot { display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border); }
 
 .segmented { display: flex; background: var(--surface-3); border-radius: 9px; padding: 3px; gap: 2px; flex: none; }

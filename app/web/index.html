@@ -1053,12 +1053,26 @@
                 <div class="card panel">
                   <div class="panel-head"><div><h3>存储位置</h3><p>所有数据都在本机，不上传</p></div></div>
                   <div class="setting-row">
-                    <div class="setting-text"><strong>数据目录</strong><span id="dataPath" class="set-path">—</span></div>
-                    <button class="btn" id="openData"><svg><use href="#i-folder"/></svg>打开</button>
+                    <div class="setting-text">
+                      <strong>数据目录 <span id="dataBadge" class="set-badge">默认</span></strong>
+                      <span id="dataPath" class="set-path">—</span>
+                      <span class="set-note"><span id="dataHint">笔记、待办、设置都存在这里</span><button type="button" class="set-link" id="resetData" hidden>恢复默认</button></span>
+                    </div>
+                    <div class="set-actions">
+                      <button class="btn" id="moveData"><svg><use href="#i-folder"/></svg>更改</button>
+                      <button class="btn" id="openData">打开</button>
+                    </div>
                   </div>
                   <div class="setting-row">
-                    <div class="setting-text"><strong>导出目录</strong><span id="exportPath" class="set-path">—</span></div>
-                    <button class="btn" id="openExports"><svg><use href="#i-download"/></svg>打开</button>
+                    <div class="setting-text">
+                      <strong>图片保存目录 <span id="exportBadge" class="set-badge">默认</span></strong>
+                      <span id="exportPath" class="set-path">—</span>
+                      <span class="set-note"><span id="exportHint">证件照、GIF、压缩图存这里</span><button type="button" class="set-link" id="resetExport" hidden>恢复默认</button></span>
+                    </div>
+                    <div class="set-actions">
+                      <button class="btn" id="moveExport"><svg><use href="#i-folder"/></svg>更改</button>
+                      <button class="btn" id="openExports">打开</button>
+                    </div>
                   </div>
                   <div class="setting-row">
                     <div class="setting-text"><strong>占用空间</strong><span id="dataUsage">正在统计…</span></div>

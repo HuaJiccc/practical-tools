@@ -24,6 +24,7 @@ from ptools import APP_NAME, notify  # noqa: E402
 from ptools.api import Api  # noqa: E402
 from ptools.config import (  # noqa: E402
     Settings,
+    app_dir,
     data_dir,
     migrate_legacy_data,
     resource_dir,
@@ -48,7 +49,7 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "2.5.0"
+VERSION = "2.6.0"
 APP_ID = "PersonalToolkit.DesktopApp"
 
 _LANG_NAMES = None
@@ -100,6 +101,95 @@ def strip_legacy_settings():
         pass
 
 
+# —— 存储位置（v2.6）：数据目录走 ptools 的 data-dir.txt，图片目录走界面偏好 ——
+
+DATA_DIR_FILE = "data-dir.txt"
+EXPORT_DIRNAME = "exports"
+
+
+def data_dir_file() -> Path:
+    """``data-dir.txt`` 的位置：打包版在 exe 旁边，源码模式在 app/ 下。"""
+    return app_dir() / DATA_DIR_FILE
+
+
+def read_data_override() -> str:
+    """读出用户指定的数据目录；没指定或文件坏了都返回空串。"""
+    try:
+        for line in data_dir_file().read_text(encoding="utf-8-sig").splitlines():
+            text = line.strip()
+            if text and not text.startswith("#"):
+                return text
+    except OSError:
+        pass
+    return ""
+
+
+def dir_writable(path: Path) -> bool:
+    """真写一个探针文件，比 os.access 可靠（Windows 上后者基本没用）。"""
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".write-probe"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        return True
+    except OSError:
+        return False
+
+
+def export_dir_of(prefs) -> Path:
+    """图片保存目录：优先用户设置，目录不在了/不可写就回落到 data/exports。"""
+    raw = ""
+    if prefs is not None:
+        raw = str(prefs.all().get("export_dir") or "").strip()
+    if raw:
+        try:
+            target = Path(raw).expanduser()
+            target.mkdir(parents=True, exist_ok=True)
+            return target
+        except OSError:
+            pass
+    fallback = data_dir() / EXPORT_DIRNAME
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback
+
+
+def copy_user_data(src: Path, dst: Path) -> int:
+    """把现有数据搬到新目录：只搬 json 记录和 exports / backup，同名不覆盖。
+
+    webview 缓存（几百 MB 的 Chromium 数据）不搬，搬到新地方也会重建。
+    """
+    import shutil
+
+    copied = 0
+    dst.mkdir(parents=True, exist_ok=True)
+    try:
+        items = list(src.iterdir())
+    except OSError:
+        return 0
+    for item in items:
+        if item.name in ("webview", ".write-probe"):
+            continue
+        target = dst / item.name
+        try:
+            if item.is_file() and item.suffix.lower() == ".json":
+                if not target.exists():
+                    shutil.copy2(item, target)
+                    copied += 1
+            elif item.is_dir() and item.name in (EXPORT_DIRNAME, "backup"):
+                for sub in item.rglob("*"):
+                    if not sub.is_file():
+                        continue
+                    out = target / sub.relative_to(item)
+                    if out.exists():
+                        continue
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(sub, out)
+                    copied += 1
+        except OSError:
+            continue
+    return copied
+
+
 def apply_dark_titlebar(dark):
     """让系统标题栏跟随深浅主题（Windows 10/11）。"""
     try:
@@ -134,6 +224,11 @@ class UiApi:
         object.__setattr__(self, "_chart", chart)
         object.__setattr__(self, "_exports", exports)
         object.__setattr__(self, "_prefs", prefs)
+        object.__setattr__(self, "_window", None)
+
+    def bind_window(self, window):
+        """窗口建好之后回填一份，目录选择框要用它。"""
+        object.__setattr__(self, "_window", window)
 
     def __getattr__(self, name):
         if name.startswith("media_"):
@@ -260,9 +355,9 @@ class UiApi:
         return {"ok": True, "results": results}
 
     def image_save(self, name, data_b64):
-        """把前端生成的图片/GIF 落盘到 data/exports，文件名去危险字符、重名自动加序号。"""
-        if not self._exports or not data_b64:
-            return {"ok": False, "error": "没有可写入的位置"}
+        """把前端生成的图片/GIF 落盘到「图片保存目录」，重名自动加序号。"""
+        if not data_b64:
+            return {"ok": False, "error": "没有可写入的内容"}
         try:
             raw = base64.b64decode(data_b64, validate=False)
         except Exception:
@@ -276,7 +371,7 @@ class UiApi:
         if len(clean) > 90:
             stem, dot, ext = clean.rpartition(".")
             clean = (stem[: 90 - len(ext) - 1] + dot + ext) if dot else clean[:90]
-        target_dir = Path(self._exports)
+        target_dir = export_dir_of(self._prefs)
         target_dir.mkdir(parents=True, exist_ok=True)
 
         path = target_dir / clean
@@ -296,11 +391,8 @@ class UiApi:
         return {"ok": True, "path": str(path), "name": path.name, "size": len(raw)}
 
     def image_open_dir(self):
-        """打开导出目录（保存后想马上看看结果）。"""
-        if not self._exports:
-            return {"ok": False}
-        path = Path(self._exports)
-        path.mkdir(parents=True, exist_ok=True)
+        """打开图片保存目录（保存后想马上看看结果）。"""
+        path = export_dir_of(self._prefs)
         try:
             os.startfile(str(path))
             return {"ok": True, "path": str(path)}
@@ -389,7 +481,7 @@ class UiApi:
                 total_files += count
         except OSError:
             pass
-        exports = root / "exports"
+        exports = export_dir_of(self._prefs)
         exp_size, exp_count = measure(exports)
         rows.sort(key=lambda row: -row["size"])
         return {
@@ -401,6 +493,128 @@ class UiApi:
             "rows": rows[:8],
             "exports": {"size": exp_size, "count": exp_count},
         }
+
+    # ---- v2.6：存储位置可自定义 ----
+
+    def dirs_info(self):
+        """当前两个目录在哪、是不是用户改过、能不能改。"""
+        override = read_data_override()
+        prefs = self._prefs.all() if self._prefs else {}
+        custom_export = str(prefs.get("export_dir") or "").strip()
+        return {
+            "ok": True,
+            "data_dir": str(data_dir()),
+            "data_default": str(app_dir() / "data"),
+            "data_override": override,
+            "data_custom": bool(override),
+            # 程序目录本身不可写时，没法记住选择（data-dir.txt 没地方放）
+            "can_move_data": dir_writable(app_dir()),
+            "export_dir": str(export_dir_of(self._prefs)),
+            "export_default": str(data_dir() / EXPORT_DIRNAME),
+            "export_custom": bool(custom_export),
+        }
+
+    def pick_folder(self, current=""):
+        """弹系统目录选择框，返回用户选的路径；取消时 cancelled 为真。"""
+        window = getattr(self, "_window", None)
+        if window is None:
+            return {"ok": False, "error": "窗口还没准备好，稍后再试"}
+        try:
+            import webview as _webview
+
+            folder = getattr(getattr(_webview, "FileDialog", None), "FOLDER", None)
+            if folder is None:  # 老版本 pywebview
+                folder = _webview.FOLDER_DIALOG
+            start = current if current and Path(current).is_dir() else str(Path.home())
+            picked = window.create_file_dialog(folder, directory=start)
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": f"打开选择框失败：{exc}"}
+        if not picked:
+            return {"ok": False, "cancelled": True}
+        return {"ok": True, "path": str(picked[0])}
+
+    def data_set_dir(self, path):
+        """切换数据目录：校验可写 → 搬一份现有数据 → 写 data-dir.txt，重启生效。"""
+        text = str(path or "").strip()
+        if not text:
+            return {"ok": False, "error": "路径为空"}
+        target = Path(text).expanduser()
+        current = data_dir().resolve()
+        try:
+            resolved = target.resolve()
+        except OSError:
+            resolved = target
+        if resolved == current:
+            return {"ok": True, "restart": False, "copied": 0, "path": str(current)}
+        if not dir_writable(target):
+            return {"ok": False, "error": "这个目录没有写入权限，换一个试试"}
+        if not dir_writable(app_dir()):
+            return {
+                "ok": False,
+                "error": "程序所在目录不可写，没法记住你的选择。把程序放到「文档」这类可写位置后再试",
+            }
+        copied = 0
+        # 新目录建在当前数据目录里面时不搬，免得套娃
+        if current not in resolved.parents:
+            copied = copy_user_data(current, target)
+        try:
+            # ptools 只读第一行有效路径，写注释会让它整段失效，这里只写路径
+            data_dir_file().write_text(f"{target}\n", encoding="utf-8")
+        except OSError as exc:
+            return {"ok": False, "error": f"写入配置失败：{exc}"}
+        return {"ok": True, "restart": True, "copied": copied, "path": str(target)}
+
+    def data_reset_dir(self):
+        """恢复默认数据目录：删掉 data-dir.txt，重启生效。"""
+        path = data_dir_file()
+        if not path.exists():
+            return {"ok": True, "restart": False, "path": str(data_dir())}
+        try:
+            path.unlink()
+        except OSError as exc:
+            return {"ok": False, "error": f"删除配置失败：{exc}"}
+        return {"ok": True, "restart": True, "path": str(app_dir() / "data")}
+
+    def export_set_dir(self, path):
+        """设置图片保存目录，立即生效（下一次保存就写到这里）。"""
+        text = str(path or "").strip()
+        if not text:
+            return {"ok": False, "error": "路径为空"}
+        target = Path(text).expanduser()
+        if not dir_writable(target):
+            return {"ok": False, "error": "这个目录没有写入权限，换一个试试"}
+        if self._prefs:
+            self._prefs.update({"export_dir": str(target)})
+        return {"ok": True, "path": str(target)}
+
+    def export_reset_dir(self):
+        """图片保存目录改回默认（数据目录下的 exports）。"""
+        if self._prefs:
+            self._prefs.update({"export_dir": ""})
+        target = data_dir() / EXPORT_DIRNAME
+        target.mkdir(parents=True, exist_ok=True)
+        return {"ok": True, "path": str(target)}
+
+    def app_restart(self):
+        """重启自己。改了数据目录必须重启，否则新位置不会生效。"""
+        import subprocess
+        import threading
+
+        if getattr(sys, "frozen", False):
+            args = [sys.executable]
+        else:
+            args = [sys.executable, str(BASE_DIR / "app.py")]
+        try:
+            subprocess.Popen(
+                args,
+                cwd=str(app_dir()),
+                creationflags=0x00000008,  # DETACHED_PROCESS，新进程不跟着一起死
+                close_fds=True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": f"重启失败：{exc}"}
+        threading.Timer(0.6, lambda: os._exit(0)).start()
+        return {"ok": True}
 
     def data_backup(self):
         """把 data 下的 json 记录复制到 data/backup/时间戳 里。"""
@@ -785,7 +999,7 @@ class UiApi:
             "mood_stats": self._mood.stats(time.strftime("%Y-%m")) if self._mood else {},
             "chart_last": self._chart.get() if self._chart else None,
             "data_dir": str(data_dir()),
-            "exports_dir": str(data_dir() / "exports"),
+            "exports_dir": str(export_dir_of(self._prefs)),
             "ui_prefs": self._prefs.all() if self._prefs else {},
             "migration": api.startup or {},
             "online": network.online(),
@@ -853,9 +1067,8 @@ def build_window():
         raise SystemExit(f"缺少界面文件：{index}")
 
     exports = root / "exports"
-    server = ApiServer(
-        UiApi(api, plan, note_meta, focus, countdown, mood, chart, exports, prefs), web_dir()
-    ).start()
+    ui = UiApi(api, plan, note_meta, focus, countdown, mood, chart, exports, prefs)
+    server = ApiServer(ui, web_dir()).start()
 
     width = int(settings.get("window_width") or 1240)
     height = int(settings.get("window_height") or 820)
@@ -876,6 +1089,7 @@ def build_window():
         text_select=True,
     )
     api.window = window
+    ui.bind_window(window)
     return window, settings
 
 

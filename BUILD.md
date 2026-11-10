@@ -1,4 +1,4 @@
-# 个人工具 2.5 — 源码说明
+# 个人工具 2.6 — 源码说明
 
 Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两者通过本机回环 HTTP 通信（`POST /api/<method>`，带 `X-Token`）。
 
@@ -9,6 +9,7 @@ Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两�
 - v2.3：新增「图片工具」页——证件照（换底 / 尺寸）、视频转 GIF、压缩到指定大小，三合一页签，产物存 `data/exports/`。
 - v2.4：翻译通道扩到 6 条——新增「腾讯交互翻译」（免 key）和「AI 接口」（OpenAI 兼容，自带 7 个服务商预设），智能选择增加兜底。
 - v2.5：设置页重做为「左侧六类分类 + 右侧内容」；新增界面密度 / 界面动效 / 启动页面 / 启动最大化 / 开机自启 / 自动翻译延迟 / 导出目录 / 占用统计 / 备份数据 / 打开说明 / 复制诊断等 11 项设置。
+- v2.6：数据目录与图片保存目录都可自定义，带「恢复默认」；切换数据目录时自动搬现有数据，重启生效；默认位置不可写时自动退到 `%APPDATA%`。
 
 ## 目录
 
@@ -279,6 +280,33 @@ python -m PyInstaller --noconfirm --clean --onefile --windowed --name "个人工
 - `settings.json` 里的 TMDB/OMDb key、玻璃参数会在启动和每次保存设置后被 `strip_legacy_settings()` 清掉。
 - `data/media.json`、`data/covers/` 不再读取；是否删除由用户决定。
 
+## 存储位置（v2.6）
+
+两个目录分别由不同机制决定，改的时候别搞混：
+
+| 目录 | 存在哪 | 生效时机 |
+|---|---|---|
+| 数据目录 | `data-dir.txt`（一行纯路径，放在 EXE 旁边 / 源码时 `app/` 下） | 重启 |
+| 图片保存目录 | `data/ui_prefs.json` 的 `export_dir` | 立即 |
+
+`ptools.config.data_dir()` 的解析顺序（这个在 .pyc 里，改不了）：
+
+1. 环境变量 `PERSONALTOOLS_DATA`（测试脚本靠它隔离数据）
+2. `data-dir.txt` 第一行有效路径
+3. `EXE 同级 /data`
+4. 上面那个不可写（`_writable()` 真写探针文件）→ `%APPDATA%` 下的旧位置
+
+**坑**：`data-dir.txt` 只认第一行有效路径，`#` 注释会让它整段失效。
+一开始往里写了三行注释头，界面显示切换成功、重启后却还是老目录，
+原因是 `app.py` 里的 `read_data_override()` 是逐行跳过注释的，比 `.pyc` 里的实现宽松，
+自测写成了「能读回」所以没发现。现在只写路径一行。
+
+`data_dir()` 在 **import 时就算死并存进 `_DATA_DIR`**，所以同进程内改环境变量无效，
+验证切换必须开子进程（`dev_dirs26.py` 就是这么做的）。
+
+切换数据目录时会复制 json 记录 / `exports` / `backup`，**不复制 `webview` 缓存**；
+新目录若从当前目录内部创建，跳过复制避免套娃。
+
 ## 自测
 
 ```bash
@@ -295,12 +323,14 @@ python dev/dev_image_probe.py     # v2.3：图片工具冒烟，三项各跑一�
 python dev/dev_image_stress.py    # v2.3：正式压力测试，三项各 12 用例（换规格/换底/换时长/换目标），输出 dev/_shots/v23/stress_report.json
 python dev/dev_installed23.py     # v2.3：启动已安装 exe，点侧栏进图片工具再逐个切页签
 python dev/dev_settings25_ui.py   # v2.5：六个分类逐个点开截图 + 密度 / 动效 / 启动页 / 延迟 / 统计 / 诊断联动
+python dev/dev_dirs26_ui.py       # v2.6：数据 / 图片目录两行的路径、徽章、按钮渲染与窄窗口排版
 python dev/dev_settings25_narrow.py # v2.5：1000px 窄窗口下分类变横向页签、无横向溢出
 python dev/dev_startpage25.py set last     # v2.5：把启动页设为「上次停留」并停在记事
 python dev/dev_startpage25.py check notes  # v2.5：重启后确认真的回到记事（验证 ui_prefs.json 生效）
 
 # 后端（不开界面）
 python dev/dev_translate_extra.py # v2.4：翻译扩展渠道，本地 mock 的 AI 接口 + 真实腾讯翻译，41 项断言
+python dev/dev_dirs26.py          # v2.6：目录切换 / 恢复默认 / 非法路径拒绝，含子进程验证真的生效
 python dev/dev_settings25_api.py  # v2.5：开机自启 / 占用统计 / 备份 / 诊断，21 项断言（自启测完会还原）
 
 # 工具
