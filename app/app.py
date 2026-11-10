@@ -59,10 +59,10 @@ APP_ID = "PracticalTools.DesktopApp"
 AUTHOR = "H.J."
 LEGACY_APP_NAMES = ("个人工具",)
 
-# 发布前只改这一行：换成实际的 GitHub 仓库地址（形如 "octocat/my-tools"）。
+# 更新源仓库（形如 "octocat/my-tools"）。换仓库只改这一行。
 # 也可以用 settings.json 里的 update_feed 覆盖，
 # 或临时用环境变量 PT_UPDATE_FEED 指向本地清单调试。
-UPDATE_REPO = "your-name/practical-tools"
+UPDATE_REPO = "HuaJiccc/practical-tools"
 UPDATE_FEED = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
 UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
 UPDATE_PLACEHOLDER = "your-name/practical-tools"
