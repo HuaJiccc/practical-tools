@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='个人工具',
+    name='实用工具',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

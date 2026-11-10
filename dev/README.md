@@ -25,6 +25,8 @@
 | `dev_dirs26_ui.py` | v2.6：数据 / 图片目录两行的路径、徽章、按钮渲染，含 1000px 窄窗口排版 |
 | `dev_startpage25.py` | 启动页面跨重启是否生效（顺带验证偏好写进了 `data/ui_prefs.json`） |
 | `dev_installed23.py` | 启动**已安装的 exe**，确认图片工具页在打包版里正常渲染 |
+| `dev_installer_shots.py` | v3.0：跑一遍安装向导（欢迎 → 协议 → 目录），逐页截图并断言页面文字；加 `--install` 会真的装到临时目录 |
+| `dev_uninstall_test.py` | v3.0：跑一遍卸载，确认程序与安装目录被清空、用户数据保留 |
 
 ## 后端自测（无界面，可直接跑）
 
@@ -33,6 +35,7 @@
 | `dev_translate_extra.py` | 翻译扩展渠道：本地 mock OpenAI 服务 + 腾讯 TranSmart，以及内置渠道不被影响 |
 | `dev_settings25_api.py` | 设置页后端接口：开机自启 / 占用统计 / 备份 / 诊断信息 |
 | `dev_dirs26.py` | v2.6：目录切换 / 恢复默认 / 拒绝非法路径，**含子进程验证 `data-dir.txt` 真的生效** |
+| `dev_check_assets.py` | 静态检查：SVG symbol 重复定义与悬空引用（CI 里也跑这个） |
 
 ## 工具
 
@@ -40,6 +43,7 @@
 |---|---|
 | `make_icon.py` | 重新生成 `assets/icon.ico`（16~256 多尺寸）与 `icon.png` |
 | `make_test_xlsx.py` | 造一个最小合法 xlsx（两个工作表 / 共享字符串 / 日期单元格），用于测「数据成图」 |
+| `shot_util.py` | 按窗口标题截图（GDI `PrintWindow`），供上面几个 UI 脚本复用 |
 
 ## 注意
 

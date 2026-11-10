@@ -216,20 +216,20 @@
   const catColor = (id) => (catOf(id) || {}).color || 'var(--text-3)';
 
   const PAGES = {
-    home: { title: '概览', sub: '今天要做什么' },
-    plan: { title: '每日规划', sub: '把一天安排成看得见的时间块' },
-    translate: { title: '翻译', sub: '六个通道可选，长文本自动分段' },
-    notes: { title: '记事本', sub: '边写边存，标题取第一行' },
-    todo: { title: '待办', sub: '一句话建任务，到点提醒' },
-    time: { title: '时间', sub: '番茄钟、倒数日、世界时钟' },
-    chart: { title: '数据成图', sub: '粘贴两列数据，直接出图' },
-    image: { title: '图片工具', sub: '证件照、视频转 GIF、压到指定大小' },
-    mood: { title: '心情日记', sub: '一天一句，月底回看' },
-    units: { title: '单位换算', sub: '长度、重量、温度、汇率等 8 类' },
-    picker: { title: '随机选择', sub: '选择困难的时候交给它' },
-    history: { title: '历史记录', sub: '每次翻译都会自动保存' },
-    favorites: { title: '收藏夹', sub: '长期保留，不会被自动清理' },
-    settings: { title: '设置', sub: '外观、通用、翻译、AI 接口与数据' },
+    home: { title: '概览', sub: '今天的事项与进度' },
+    plan: { title: '每日规划', sub: '以时间块方式安排一天' },
+    translate: { title: '翻译', sub: '六个渠道可选，长文本自动分段' },
+    notes: { title: '记事本', sub: '自动保存，标题取自首行' },
+    todo: { title: '待办', sub: '快速创建任务，到点提醒' },
+    time: { title: '时间', sub: '番茄钟、倒数日与世界时钟' },
+    chart: { title: '数据成图', sub: '粘贴两列数据，即时生成图表' },
+    image: { title: '图片工具', sub: '证件照换底、视频转 GIF、图片压缩' },
+    mood: { title: '心情日记', sub: '每日一句，按月回顾' },
+    units: { title: '单位换算', sub: '长度、重量、温度、汇率等 8 类单位' },
+    picker: { title: '随机选择', sub: '随机抽取，用于选择与分组' },
+    history: { title: '历史记录', sub: '翻译记录自动留存，可检索' },
+    favorites: { title: '收藏夹', sub: '长期保存，不受自动清理影响' },
+    settings: { title: '设置', sub: '外观、通用、翻译、接口与数据' },
   };
 
   /* ---------------- 偏好 ---------------- */

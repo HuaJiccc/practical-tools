@@ -1,7 +1,7 @@
-"""个人工具 2.0 —— 桌面外壳。
+"""实用工具 —— 桌面外壳。
 
 界面是纯本地 HTML/CSS/JS，通过本机回环 HTTP 服务和 Python 后端通信。
-本版本移除了「影视书籍」模块，并重做了整套界面（无玻璃/模糊材质）。
+产品名在此统一定义：窗口标题、任务栏身份、开机自启项都读它。
 """
 
 import base64
@@ -20,7 +20,7 @@ if str(BASE_DIR) not in sys.path:
 
 import webview  # noqa: E402
 
-from ptools import APP_NAME, notify  # noqa: E402
+from ptools import notify  # noqa: E402
 from ptools.api import Api  # noqa: E402
 from ptools.config import (  # noqa: E402
     Settings,
@@ -49,8 +49,38 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "2.6.0"
-APP_ID = "PersonalToolkit.DesktopApp"
+VERSION = "3.0.0"
+APP_NAME = "实用工具"
+APP_NAME_EN = "Utility Toolkit"
+APP_ID = "PracticalTools.DesktopApp"
+LEGACY_APP_NAMES = ("个人工具",)
+
+
+def _rebrand_runtime():
+    """ptools 是预编译模块，产品名写死在字节码里，进程内统一改写一次。
+
+    影响两处：系统通知的发送者名（notify.DISPLAY_NAME）与任务栏标识。
+    不做的话，通知弹出来仍写着旧名字。
+    """
+    import ptools
+    from ptools import api as pt_api
+    from ptools import notify as pt_notify
+
+    for module in (ptools, pt_api, pt_notify):
+        for attr, value in (
+            ("APP_NAME", APP_NAME),
+            ("DISPLAY_NAME", APP_NAME),
+            ("APP_EN_NAME", APP_NAME_EN),
+            ("APP_ID", APP_ID),
+        ):
+            if hasattr(module, attr):
+                try:
+                    setattr(module, attr, value)
+                except Exception:  # noqa: BLE001
+                    pass
+
+
+_rebrand_runtime()
 
 _LANG_NAMES = None
 
@@ -122,6 +152,26 @@ def read_data_override() -> str:
     except OSError:
         pass
     return ""
+
+
+def install_data_dir() -> "Path | None":
+    """安装版的数据目录（%LOCALAPPDATA%\\实用工具\\data）；免安装版返回 None。
+
+    判定依据是程序装在 %LOCALAPPDATA%\\Programs 下 —— 这是 Inno 按用户安装时的
+    默认位置。这种装法下把数据放在用户目录比塞进安装目录更合适：卸载不会连带
+    删除，也不需要管理员权限。
+
+    安装包会写 data-dir.txt 指向这里，所以界面上要把它当作「默认」而不是
+    「自定义」——用户并没有做过选择。
+    """
+    local = os.environ.get("LOCALAPPDATA")
+    if not local:
+        return None
+    try:
+        app_dir().resolve().relative_to((Path(local) / "Programs").resolve())
+    except (ValueError, OSError):
+        return None
+    return Path(local) / APP_NAME / "data"
 
 
 def dir_writable(path: Path) -> bool:
@@ -416,8 +466,11 @@ class UiApi:
 
     # ---- v2.5：通用 / 数据 / 关于 设置项 ----
     def sys_autostart(self, enabled=None):
-        """读写开机自启（HKCU\\...\\Run，不需要管理员，不弹黑窗）。"""
-        name = "个人工具"
+        """读写开机自启（HKCU\\...\\Run，不需要管理员，不弹黑窗）。
+
+        改名前留下的旧项会在读取时自动接到新名下，避免升级后自启悄悄失效。
+        """
+        name = APP_NAME
         run_key = r"Software\Microsoft\Windows\CurrentVersion\Run"
         if getattr(sys, "frozen", False):
             command = f'"{Path(sys.executable)}"'
@@ -432,7 +485,9 @@ class UiApi:
                         value, _ = winreg.QueryValueEx(key, name)
                     return {"ok": True, "enabled": bool(str(value).strip()), "command": command}
                 except FileNotFoundError:
-                    return {"ok": True, "enabled": False, "command": command}
+                    pass
+                migrated = self._adopt_legacy_autostart(run_key, name, command)
+                return {"ok": True, "enabled": migrated, "command": command}
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, run_key, 0, winreg.KEY_SET_VALUE) as key:
                 if enabled:
                     winreg.SetValueEx(key, name, 0, winreg.REG_SZ, command)
@@ -444,6 +499,36 @@ class UiApi:
             return {"ok": True, "enabled": bool(enabled), "command": command}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": f"写注册表失败：{exc}"}
+
+    @staticmethod
+    def _adopt_legacy_autostart(run_key, name, command):
+        """把旧产品名下的自启项改写成当前名字，返回是否接管到了。"""
+        try:
+            import winreg
+        except Exception:
+            return False
+        adopted = False
+        for old in LEGACY_APP_NAMES:
+            try:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, run_key) as key:
+                    old_value, _ = winreg.QueryValueEx(key, old)
+            except FileNotFoundError:
+                continue
+            if not str(old_value).strip():
+                continue
+            try:
+                with winreg.OpenKey(
+                    winreg.HKEY_CURRENT_USER, run_key, 0, winreg.KEY_SET_VALUE
+                ) as key:
+                    winreg.SetValueEx(key, name, 0, winreg.REG_SZ, command)
+                    try:
+                        winreg.DeleteValue(key, old)
+                    except FileNotFoundError:
+                        pass
+                adopted = True
+            except OSError:
+                continue
+        return adopted
 
     def data_stats(self):
         """统计数据目录占用（跳过 webview 缓存，那个不算用户数据）。"""
@@ -501,12 +586,20 @@ class UiApi:
         override = read_data_override()
         prefs = self._prefs.all() if self._prefs else {}
         custom_export = str(prefs.get("export_dir") or "").strip()
+        default_dir = install_data_dir() or (app_dir() / "data")
+        # 安装包写的默认值也算默认：用户没选过，界面不该显示「自定义」
+        at_default = False
+        if override:
+            try:
+                at_default = Path(override).resolve() == Path(default_dir).resolve()
+            except OSError:
+                at_default = False
         return {
             "ok": True,
             "data_dir": str(data_dir()),
-            "data_default": str(app_dir() / "data"),
+            "data_default": str(default_dir),
             "data_override": override,
-            "data_custom": bool(override),
+            "data_custom": bool(override) and not at_default,
             # 程序目录本身不可写时，没法记住选择（data-dir.txt 没地方放）
             "can_move_data": dir_writable(app_dir()),
             "export_dir": str(export_dir_of(self._prefs)),
@@ -565,15 +658,27 @@ class UiApi:
         return {"ok": True, "restart": True, "copied": copied, "path": str(target)}
 
     def data_reset_dir(self):
-        """恢复默认数据目录：删掉 data-dir.txt，重启生效。"""
+        """恢复默认数据目录，重启生效。
+
+        安装版把配置写回用户目录，而不是删文件 —— 删掉的话重启后会落到安装
+        目录里的 data，卸载时会被一并清理，等于把数据放到了会消失的地方。
+        """
+        default_dir = install_data_dir() or (app_dir() / "data")
         path = data_dir_file()
+        if install_data_dir() is not None:
+            try:
+                path.write_text(str(default_dir), encoding="utf-8")
+            except OSError as exc:
+                return {"ok": False, "error": f"写入配置失败：{exc}"}
+            restart = Path(str(default_dir)).resolve() != Path(data_dir()).resolve()
+            return {"ok": True, "restart": restart, "path": str(default_dir)}
         if not path.exists():
             return {"ok": True, "restart": False, "path": str(data_dir())}
         try:
             path.unlink()
         except OSError as exc:
             return {"ok": False, "error": f"删除配置失败：{exc}"}
-        return {"ok": True, "restart": True, "path": str(app_dir() / "data")}
+        return {"ok": True, "restart": True, "path": str(default_dir)}
 
     def export_set_dir(self, path):
         """设置图片保存目录，立即生效（下一次保存就写到这里）。"""
@@ -947,7 +1052,7 @@ class UiApi:
 
     def bootstrap(self):
         api = self._api
-        from ptools import APP_NAME, aihint, languages, network, notify, translate, units
+        from ptools import aihint, languages, network, notify, translate, units
         from ptools.todo import PRIORITIES, REPEATS, STATUSES
 
         settings = api.settings.all()

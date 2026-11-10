@@ -1,4 +1,4 @@
-# 个人工具 2.6 — 源码说明
+# 实用工具 3.0 — 源码说明
 
 Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两者通过本机回环 HTTP 通信（`POST /api/<method>`，带 `X-Token`）。
 
@@ -10,6 +10,7 @@ Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两�
 - v2.4：翻译通道扩到 6 条——新增「腾讯交互翻译」（免 key）和「AI 接口」（OpenAI 兼容，自带 7 个服务商预设），智能选择增加兜底。
 - v2.5：设置页重做为「左侧六类分类 + 右侧内容」；新增界面密度 / 界面动效 / 启动页面 / 启动最大化 / 开机自启 / 自动翻译延迟 / 导出目录 / 占用统计 / 备份数据 / 打开说明 / 复制诊断等 11 项设置。
 - v2.6：数据目录与图片保存目录都可自定义，带「恢复默认」；切换数据目录时自动搬现有数据，重启生效；默认位置不可写时自动退到 `%APPDATA%`。
+- v3.0：更名「实用工具」；新增 Inno Setup 安装程序（协议页 / 自定义目录 / 快捷方式 / 卸载项 / WebView2 检测）；安装版数据固定放 `%LOCALAPPDATA%\实用工具\data`，卸载保留；功能描述统一改写。
 
 ## 目录
 
@@ -28,8 +29,13 @@ personaltools/
 │     ├─ style.css      CSS 变量主题 + 组件（纯实色，无 backdrop-filter）
 │     └─ app.js         hash 路由 + 各页逻辑，约 4300 行
 ├─ assets/icon.ico      应用图标（256/128/64/48/32/24/16，由 dev/make_icon.py 生成）
-├─ dist/个人工具.exe     打包产物
-└─ dev/                 自测脚本（截图、交互断言、主题、打包运行、图标生成）
+├─ installer/
+│  ├─ app.iss           Inno Setup 脚本：协议页 / 目录选择 / 快捷方式 / 卸载 / WebView2 检测
+│  ├─ 许可协议.txt       安装向导里显示的协议（UTF-8 带 BOM）
+│  └─ ChineseSimplified.isl  向导的简体中文语言包（Inno 官方已不再内置）
+├─ dist/实用工具.exe     打包产物
+├─ dist-installer/      安装程序产物
+└─ dev/                 自测脚本（截图、交互断言、打包运行、安装/卸载流程、图标生成）
 ```
 
 ## uistore：不改后端也能存新数据
@@ -68,20 +74,39 @@ PERSONALTOOLS_DATA=/d/tmp/ptdata python app/app.py
 ## 打包
 
 ```bash
-python -m PyInstaller --noconfirm --clean --onefile --windowed --name "个人工具" \
-  --icon "assets/icon.ico" \
-  --add-data "app/web;web" --add-data "app/ptools;ptools" --add-data "assets/icon.ico;assets" \
-  --paths app --hidden-import webview.platforms.edgechromium \
-  --exclude-module tkinter --exclude-module PIL "app/app.py"
+python -m PyInstaller --noconfirm --clean 实用工具.spec
 ```
 
-产物：`dist/个人工具.exe`（约 13 MB，单文件）。
+产物：`dist/实用工具.exe`（约 13 MB，单文件）。
 用户数据仍在 exe 旁的 `data/`，覆盖升级 exe 即可，数据不动。
 
 注意：
 - onefile 会解压到临时目录，运行期资源路径用 `sys._MEIPASS`；`app.py` 顶部已把它插进 `sys.path`，这样 `ptools` 能导入。
 - 打包后首次启动慢 3-5 秒属正常。
 - 缺界面文件 / 启动异常会写到 `data/startup-error.log`。
+
+## 安装程序
+
+用 Inno Setup 6.7（免费）。装着的话直接：
+
+```bash
+ISCC.exe installer\app.iss
+# 产物：dist-installer\实用工具-3.0.0-安装程序.exe（约 15 MB）
+```
+
+设计上的几条约束，改脚本前先看：
+
+| 决定 | 原因 |
+|---|---|
+| `PrivilegesRequired=lowest` | 默认装到 `%LOCALAPPDATA%\Programs`，不弹 UAC；装了没权限的机器也能用 |
+| 数据写 `%LOCALAPPDATA%\实用工具\data` | 卸载不删程序目录外的文件，所以数据天然保留；也不用担心装在只读位置 |
+| `data-dir.txt` 用 **UTF-8 带 BOM** 写 | 程序按 `utf-8-sig` 读；用默认 ANSI 写会把中文路径变成乱码，程序随即回落到默认目录 |
+| 只写一行路径 | `ptools` 只认第一行有效内容，写注释会让整段失效 |
+| 卸载阶段不放 `MsgBox` | 会阻塞卸载线程，进度条停在 0% 不动。数据保留是默认行为，不需要问 |
+| `[InstallDelete]` 删 `个人工具.exe` | 改名前的旧文件，留着占 13 MB 且容易误点 |
+
+`InitializeSetup` 会查三处注册表确认 WebView2 是否存在（HKLM 的 WOW6432Node / HKLM / HKCU），
+缺失时提示并给出微软下载页，不阻断安装。
 
 ## 界面结构
 
@@ -251,8 +276,9 @@ python -m PyInstaller --noconfirm --clean --onefile --windowed --name "个人工
 `:root[data-density="compact"]` 收紧 `.page/.panel/.setting-row` 的 padding，
 `:root[data-motion="off"]` 把所有动画/过渡压到 0.001ms。
 
-开机自启写 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 的 `个人工具` 值，
+开机自启写 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 的 `实用工具` 值，
 不需要管理员权限；`sys.frozen` 决定命令是 `exe` 还是 `python app.py`，卸载/移动位置后开关重开一次即可重新登记。
+改名前的 `个人工具` 值会在首次读取时自动改写过来（`_adopt_legacy_autostart`），否则升级后自启会指向旧 exe。
 
 诊断信息 `diag_info()` 同时返回 `items`（给界面渲染成两列表格）和 `text`（给「复制」用），
 **不要**把 `ai_api_key` 放进去，只输出「已配置 / 未配置」。
@@ -327,6 +353,8 @@ python dev/dev_dirs26_ui.py       # v2.6：数据 / 图片目录两行的路径�
 python dev/dev_settings25_narrow.py # v2.5：1000px 窄窗口下分类变横向页签、无横向溢出
 python dev/dev_startpage25.py set last     # v2.5：把启动页设为「上次停留」并停在记事
 python dev/dev_startpage25.py check notes  # v2.5：重启后确认真的回到记事（验证 ui_prefs.json 生效）
+python dev/dev_installer_shots.py          # v3.0：跑安装向导（欢迎 / 协议 / 目录）逐页截图并断言
+python dev/dev_uninstall_test.py "D:\测试目录"  # v3.0：卸载后程序与安装目录清空、用户数据保留
 
 # 后端（不开界面）
 python dev/dev_translate_extra.py # v2.4：翻译扩展渠道，本地 mock 的 AI 接口 + 真实腾讯翻译，41 项断言
@@ -356,7 +384,7 @@ Python 侧轮询取值（**`evaluate_js` 对 Promise 只返回 `{}`，不能直�
 ```bash
 python -c "
 from PyInstaller.archive.readers import CArchiveReader
-r = CArchiveReader('dist/个人工具.exe')
+r = CArchiveReader('dist/实用工具.exe')
 print(r.extract('web\\\\app.js') == open('app/web/app.js','rb').read())
 "
 ```
