@@ -354,6 +354,7 @@ python dev/dev_lang.py            # v1.0：切英文逐页扫残留中文、切�
 python dev/dev_lang_shots.py      # v1.0：英文界面各页截图 + 窗口标题跟随语言
 python dev/dev_update_ui.py       # v1.0：关于页版本 / 更新说明 / 检出新版 / 下载提示（本地 mock 更新源）
 python dev/dev_packaged_v10.py "D://安装目录"  # v1.0：打包版实测托盘与最小化
+python dev/dev_dark_inputs.py     # v1.0：深色下时间 / 日期框背景与文字颜色（10 项）
 python dev/dev_settings25_ui.py   # v2.5：六个分类逐个点开截图 + 密度 / 动效 / 启动页 / 延迟 / 统计 / 诊断联动
 python dev/dev_dirs26_ui.py       # v2.6：数据 / 图片目录两行的路径、徽章、按钮渲染与窄窗口排版
 python dev/dev_settings25_narrow.py # v2.5：1000px 窄窗口下分类变横向页签、无横向溢出

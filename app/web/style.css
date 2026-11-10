@@ -4,6 +4,9 @@
    ========================================================= */
 
 :root {
+  /* 让浏览器原生控件（时间/日期选择器、滚动条、下拉箭头）跟随配色，
+     否则深色模式下 <input type="time"> 会保持白底，看不出数字 */
+  color-scheme: light;
   --bg: #f3f4f6;
   --surface: #ffffff;
   --surface-2: #f8f9fb;
@@ -31,6 +34,7 @@
 }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #101215;
   --surface: #181b20;
   --surface-2: #1e2229;
@@ -382,7 +386,9 @@ kbd {
 }
 :root[data-theme="dark"] .btn-primary kbd { background: rgba(0, 0, 0, 0.14); }
 
-input[type="text"], input[type="number"], input:not([type]), textarea, select {
+input[type="text"], input[type="number"], input:not([type]),
+input[type="time"], input[type="date"], input[type="datetime-local"], input[type="month"],
+textarea, select {
   font-size: 13.5px;
   color: var(--text);
   background: var(--surface);
@@ -391,10 +397,31 @@ input[type="text"], input[type="number"], input:not([type]), textarea, select {
   outline: none;
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
-input:not([type]), input[type="text"], input[type="number"] {
+input:not([type]), input[type="text"], input[type="number"],
+input[type="time"], input[type="date"], input[type="datetime-local"], input[type="month"] {
   height: 36px;
   padding: 0 11px;
   width: 100%;
+  font-family: var(--font);
+}
+/* 时间/日期框里的原生字形（12:00、2026/11/10）用等宽数字，避免跳动 */
+input[type="time"], input[type="date"], input[type="datetime-local"], input[type="month"] {
+  font-variant-numeric: tabular-nums;
+}
+/* 深色下日历图标默认还是黑的，反相一次 */
+:root[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6);
+  opacity: 0.7;
+  cursor: pointer;
+}
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent);
