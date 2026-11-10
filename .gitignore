@@ -7,13 +7,16 @@ dist-installer/
 # ---------- Python ----------
 __pycache__/
 *.py[cod]
-# app/ptools 是随程序分发的预编译模块，必须保留
-!app/ptools/*.pyc
+*.egg-info/
+.venv/
+venv/
 
 # ---------- 开发用临时数据（个人笔记 / 待办 / 心情 / WebView2 缓存）----------
 dev/_data*/
 dev/_px/
 dev/_shots*/
+dev/_fast_app/
+dev/_oracle/
 dev/_*.json
 dev/*.log
 

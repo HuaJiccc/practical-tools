@@ -56,9 +56,10 @@ VERSION = "1.0.0"
 APP_NAME = "实用工具"
 APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
+AUTHOR = "H.J."
 LEGACY_APP_NAMES = ("个人工具",)
 
-# 发布到自己的仓库时，把这一行换成实际地址即可（形如 "octocat/my-tools"）；
+# 发布前只改这一行：换成实际的 GitHub 仓库地址（形如 "octocat/my-tools"）。
 # 也可以用 settings.json 里的 update_feed 覆盖，
 # 或临时用环境变量 PT_UPDATE_FEED 指向本地清单调试。
 UPDATE_REPO = "your-name/practical-tools"
@@ -83,10 +84,10 @@ RELEASE_NOTES_EN = """1.0 first stable release
 
 
 def _rebrand_runtime():
-    """ptools 是预编译模块，产品名写死在字节码里，进程内统一改写一次。
+    """把 `ptools` 里的产品名改成当前名字，进程内只改一次。
 
     影响两处：系统通知的发送者名（notify.DISPLAY_NAME）与任务栏标识。
-    不做的话，通知弹出来仍写着旧名字。
+    改名后不做这一步，通知弹出来仍写着旧名字。
     """
     import ptools
     from ptools import api as pt_api
@@ -516,6 +517,37 @@ class UiApi:
                 pass
         return {"ok": True, "prefs": merged}
 
+    def close_decision(self, action="", remember=True):
+        """用户在「关闭窗口要怎样」里做的选择。
+
+        第一次点 × 时前端弹框问一次，选完写进 ui_prefs.close_action，
+        以后点 × 直接照做；设置里可以改回「先问我」。
+        """
+        act = str(action or "").strip().lower()
+        if act not in ("tray", "quit"):
+            return {"ok": False, "error": "无效的选择"}
+
+        host = self._tray_host
+        if self._prefs and remember:
+            self._prefs.update({"close_action": act})
+
+        if act == "quit":
+            if host:
+                host.quit()
+            elif self._window:
+                try:
+                    self._window.destroy()
+                except Exception:
+                    os._exit(0)
+            return {"ok": True, "action": "quit"}
+
+        if host and host.available:
+            host.hide_later(balloon=False)
+            return {"ok": True, "action": "tray"}
+
+        # 没托盘可收：留在窗口，别让程序凭空消失
+        return {"ok": False, "error": "托盘图标不可用，程序仍在运行"}
+
     # ---- v2.5：通用 / 数据 / 关于 设置项 ----
     def sys_autostart(self, enabled=None):
         """读写开机自启（HKCU\\...\\Run，不需要管理员，不弹黑窗）。
@@ -837,6 +869,7 @@ class UiApi:
             edge = "未读取到"
         items = [
             ["版本", VERSION],
+            ["作者", AUTHOR],
             ["系统", f"{platform.system()} {platform.release()} ({platform.version()})"],
             ["Python", f"{platform.python_version()} {platform.machine()}"],
             ["WebView2", edge],
@@ -862,6 +895,8 @@ class UiApi:
             "version": VERSION,
             "name": APP_NAME,
             "name_en": APP_NAME_EN,
+            "author": AUTHOR,
+            "repo": "" if UPDATE_PLACEHOLDER in UPDATE_REPO else UPDATE_REPO,
             "notes": RELEASE_NOTES_EN if lang.startswith("en") else RELEASE_NOTES,
             "page": settings.get("update_page") or UPDATE_PAGE,
             "feed": settings.get("update_feed") or UPDATE_FEED,
@@ -1393,6 +1428,7 @@ class TrayHost:
         self.available = False
         self.error = ""
         self._ballooned = False
+        self._asked_at = 0.0
 
     # ------- 偏好 -------
 
@@ -1402,6 +1438,25 @@ class TrayHost:
         except Exception:
             value = None
         return default if value is None else bool(value)
+
+    def pref_str(self, key, default=""):
+        try:
+            value = (self.prefs.all() if self.prefs else {}).get(key)
+        except Exception:
+            value = None
+        if value is None or value == "":
+            return default
+        return str(value)
+
+    def close_action(self):
+        """点 × 该干什么：'tray' / 'quit' / ''（还没选过，需要问一次）。"""
+        action = self.pref_str("close_action", "")
+        if action in ("tray", "quit"):
+            return action
+        # 旧版只有 close_to_tray 开关，读过来当成已经选过，免得升级后又问一遍
+        if self.pref("close_to_tray", False):
+            return "tray"
+        return ""
 
     def lang(self):
         try:
@@ -1525,17 +1580,49 @@ class TrayHost:
     def on_closing(self):
         if self.quitting:
             return True
-        if self.pref("close_to_tray", False) and self.available:
-            # closing 是阻塞事件，回调跑在 WinForms 的 UI 线程上。
-            # 在这里直接 hide() 会去 Invoke 同一个线程，把消息泵卡住，
-            # 窗口虽然藏起来了但界面就不再响应。所以返回后另起线程收窗口。
-            def later():
-                time.sleep(0.05)
-                self.hide_to_tray(balloon=True)
+        if not self.available:
+            return True
 
-            threading.Thread(target=later, name="pt-tray-hide", daemon=True).start()
+        action = self.close_action()
+        if action == "quit":
+            return True
+        if action == "tray":
+            self.hide_later(balloon=True)
             return False  # 取消关闭
-        return True
+
+        # 还没选过：取消关闭，弹一次二选一。选完写进 prefs，以后不再问。
+        threading.Thread(target=self.ask_close_action, name="pt-tray-ask", daemon=True).start()
+        return False
+
+    def hide_later(self, balloon=True):
+        """closing 是阻塞事件、回调跑在 WinForms 的 UI 线程上。
+
+        在回调里直接 hide() 会去 Invoke 同一个线程，把消息泵卡住
+        （窗口藏了但界面不再响应）。所以返回后另起线程收窗口。
+        """
+
+        def later():
+            time.sleep(0.05)
+            self.hide_to_tray(balloon=balloon)
+
+        threading.Thread(target=later, name="pt-tray-hide", daemon=True).start()
+
+    def ask_close_action(self):
+        """让前端弹「收进托盘 / 直接退出」的框。
+
+        不设常驻标志位：用户按 Esc 取消后还得能再问，
+        所以只按时间挡住 1.2 秒内的重复触发（狂点 × 不会叠出多个弹窗）。
+        """
+        now = time.time()
+        if now - self._asked_at < 1.2:
+            return
+        self._asked_at = now
+        try:
+            time.sleep(0.06)
+            self.window.evaluate_js("window.PTAskClose && window.PTAskClose()")
+        except Exception:
+            # 前端没接住（界面已经挂了），按最保守的方式留在托盘
+            self.hide_later(balloon=True)
 
 
 def attach_tray(window):

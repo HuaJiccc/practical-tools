@@ -5,7 +5,7 @@ a = Analysis(
     ['app/app.py'],
     pathex=['app'],
     binaries=[],
-    datas=[('app/web', 'web'), ('app/ptools', 'ptools'), ('assets/icon.ico', 'assets')],
+    datas=[('app/web', 'web'), ('app/ptools/*.py', 'ptools'), ('assets/icon.ico', 'assets')],
     hiddenimports=['webview.platforms.edgechromium'],
     hookspath=[],
     hooksconfig={},

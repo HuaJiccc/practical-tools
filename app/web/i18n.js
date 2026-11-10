@@ -574,6 +574,7 @@
     '数据成图': 'Charts',
     '集翻译、记事、待办、时间管理、单位换算、数据成图与图片处理于一体，13 项工具统一在一个窗口内运行。数据保存在本机，断网时除翻译与汇率外均可正常使用。':
       'Translation, notes, to-dos, time management, unit conversion, charts and image processing in one window. Data stays on this device; everything except translation and exchange rates works offline.',
+    '作者 H.J. · MIT 协议': 'By H.J. · MIT License',
 
     // ── 补齐（v1.0 托盘与语言设置） ──
     'AI 翻译接口': 'AI translation API',
@@ -613,6 +614,22 @@
     '开': 'On',
     '关': 'Off',
     '中文': 'Chinese',
+    // ── 关闭窗口时的二选一 ──
+    '关闭窗口时': 'When closing the window',
+    '先问我': 'Ask me',
+    '收进托盘': 'Keep in tray',
+    '直接退出': 'Quit',
+    '第一次点 × 会问你，选过就照做': 'Asks the first time you click ×, then remembers',
+    '关闭窗口后要怎样？': 'What should happen on close?',
+    '选一次就记住，之后点 × 直接照做': 'Pick once and it will not ask again',
+    '程序留在后台，待办提醒照常，双击托盘图标就能回来':
+      'Keeps running in the background, reminders still fire, double-click the tray icon to return',
+    '彻底关闭，托盘图标也一起消失': 'Closes completely and removes the tray icon',
+    '选过之后不再询问；想改动到 设置 → 通用 → 关闭窗口时。':
+      'It will not ask again. Change it later in Settings → General → When closing the window.',
+    '下次点关闭时会问你': 'The next close will ask you',
+    '现在点关闭会收进托盘': 'Closing now keeps it in the tray',
+    '现在点关闭直接退出': 'Closing now quits the app',
     '一': 'Mon',
     '二': 'Tue',
     '三': 'Wed',

@@ -22,10 +22,10 @@ jobs:
       - name: 语法编译检查
         run: python -m compileall -q app dev
 
-      # app/ptools 是随仓库分发的字节码，magic number 绑定解释器版本。
-      # 这一步失败通常意味着 pyc 被清理了，或 Python 版本不是 3.13。
-      - name: 预编译模块可导入
-        run: python -c "import sys; sys.path.insert(0, 'app'); import ptools.config, ptools.store, ptools.translate, ptools.todo, ptools.notes, ptools.server; print('ptools import ok')"
+      # ptools 全部是纯标准库源码，没有编译产物，也不需要特定解释器版本。
+      # 这一步失败通常意味着某个模块引入了第三方依赖，或语法不兼容。
+      - name: 后端模块可导入
+        run: python -c "import sys; sys.path.insert(0, 'app'); import ptools, ptools.api, ptools.server, ptools.translate, ptools.todo, ptools.nlptime, ptools.currency; print('ptools import ok')"
 
       - name: 前端资源与图标引用
         run: python dev/dev_check_assets.py

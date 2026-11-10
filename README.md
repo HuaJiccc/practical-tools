@@ -6,6 +6,8 @@
 A local-first Windows toolbox built with pywebview. 13 everyday utilities in one window,
 no account, no cloud, everything stays on your disk.
 
+作者 **H.J.**，MIT 协议，Python 与前端代码全部开源，没有预编译的黑盒模块。
+
 ![主界面](docs/screenshots/home.png)
 
 ## 下载与安装
@@ -60,8 +62,10 @@ no account, no cloud, everything stays on your disk.
 
 - **中文 / English 即时切换**：设置 → 外观 → 界面语言。不用重启，窗口标题、
   托盘菜单、关于页内容都跟着变，选择会被记住。
-- **常驻托盘**：最小化默认收进托盘；可在 设置 → 通用 → 窗口与托盘 里改成
-  「关闭时留在托盘」。左键单击托盘图标回到窗口，右键菜单可打开设置、打开数据目录或退出。
+- **常驻托盘**：最小化默认收进托盘。点 × 关闭时要不要留在后台，第一次会问你一次：
+  「收进托盘」还是「直接退出」；选过就照做，不再打扰。想改回每次询问，到
+  设置 → 通用 → 关闭窗口时 里选「先问我」。左键单击托盘图标回到窗口，
+  右键菜单可打开设置、打开数据目录或退出。
 - **检查更新**：关于页可以查是否有新版本。有新版时能直接下载并启动安装程序，
   也可以打开发布页手动下载。
 
@@ -95,7 +99,7 @@ no account, no cloud, everything stays on your disk.
 
 - Windows 10 / 11
 - [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)（Win11 自带，Win10 多数已装）
-- **Python 3.13**（见下方「关于 app/ptools」，这一点不能将就）
+- **Python 3.10 及以上**（开发与打包用的是 3.13）
 
 ```bash
 pip install -r requirements.txt
@@ -127,25 +131,27 @@ app/
   uistore.py       界面侧独立存储（规划 / 分类 / 番茄钟 / 倒数日 / 心情 / 图表 / 偏好）
   tray.py          系统托盘（Shell_NotifyIcon，纯 ctypes，不依赖 pystray）
   update.py        检查更新与下载安装包（支持自定义清单与 GitHub Releases 两种格式）
-  ptools/          核心逻辑（大部分为预编译模块，见下）
+  ptools/          内核：纯标准库，无第三方依赖，从存储到翻译全在这里
   web/             前端：index.html + style.css + app.js + i18n.js，无框架
 assets/            应用图标
 installer/         安装程序脚本与许可协议文本
-dev/               自测脚本 22 个：功能回归、图片压测、托盘、语言、更新、安装/卸载（见 dev/README.md）
+dev/               自测脚本 30 个：功能回归、图片压测、托盘、语言、更新、安装/卸载（见 dev/README.md）
 docs/              截图与使用说明
 ```
 
-## 关于 `app/ptools`
+## 内核 `app/ptools`
 
-这个目录下大部分文件是 **预编译的 `.pyc`**（翻译、存储、通知、时间解析等核心逻辑），
-仓库中没有它们的源码。由此带来两个限制：
+内核全在这一个包里，**只有 Python 标准库**，没有 `.pyd`、没有编译产物、没有第三方包：
 
-1. **必须用 Python 3.13**。字节码的 magic number 绑定版本，3.11 / 3.12 会直接
-   `ImportError: bad magic number`。
-2. **这部分无法修改**。要调整其中行为，需要自行编写同名模块替换，或直接使用 Release 中的 exe。
+| 层 | 模块 | 管什么 |
+|---|---|---|
+| 存数据 | `config` `store` `notes` `picker` `todo` `currency` | 设置、历史、记事、随机选择、待办、汇率缓存 |
+| 干活的 | `nlptime` `units` `languages` `translate` `aihint` | 中文时间解析、单位换算、语言表、四个翻译渠道、AI 识别 |
+| 碰系统 | `clipboard` `notify` `network` `httpclient` | 剪贴板、系统通知、在线探测、HTTP（含 gzip/deflate） |
+| 组装 | `server` `api` | 本地回环 HTTP 服务、给界面的方法集合 |
 
-`app/app.py`、`app/web/`、`app/uistore.py`、`app/aitranslate.py` 均为完整源码，可以自由修改。
-计划后续把 `ptools` 的核心逻辑用标准库重写并开源，使整个项目可读可改。
+想改行为直接改源码，改完 `python app/app.py` 就能看到效果，不需要重新编译。
+`dev/dev_ptools_diff.py` 里有一套新旧实现的对照测试，说明见 [BUILD.md](BUILD.md)。
 
 ## 数据
 
@@ -178,6 +184,22 @@ backup/            「备份数据」生成的副本
 - 仅支持 Windows（依赖 WebView2 与部分 Win32 调用）
 - 世界时钟、汇率换算需要联网，其余功能离线可用
 - 翻译渠道走的是各服务的公开网页接口，服务方改版即可能失效
+- 「影视书籍」模块在 v2.0 已移除，`ptools/media.py` 只保留一个会抛错的占位
+- 中文时间解析覆盖常见说法（`明天下午三点`、`12月25日`、`每周一`），
+  不含方言与外语表达
+
+## 反馈与参与
+
+发现 bug、或者想加个功能，到 [Issues](../../issues) 提；改代码请直接开 Pull Request。
+
+改动内核（`app/ptools/`）时请顺手跑一遍对照测试，确认没有把既有行为改坏：
+
+```bash
+python dev/dev_ptools_diff.py    # 新旧实现逐项对照，87 项
+python dev/dev_check_assets.py   # 前端资源引用检查
+```
+
+`dev/` 里的脚本怎么用见 [dev/README.md](dev/README.md)，实现细节与踩过的坑见 [BUILD.md](BUILD.md)。
 
 ## 免责声明
 
@@ -189,4 +211,4 @@ backup/            「备份数据」生成的副本
 
 ## 协议
 
-[MIT](LICENSE)
+[MIT](LICENSE) © 2026 H.J.

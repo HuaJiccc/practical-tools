@@ -120,6 +120,51 @@
     });
   }
 
+  /* 第一次点 × 时问一次：收进托盘，还是直接退出。
+     选完写进 ui_prefs.close_action，之后不再打扰；设置里能改回来。
+     由 Python 侧（TrayHost.on_closing）在真正关闭前调用。 */
+  let closeAsking = false;
+  function askCloseAction() {
+    if (closeAsking) return;
+    if ($('#modalRoot').classList.contains('open')) return;
+    closeAsking = true;
+
+    const modal = openModal({
+      title: '关闭窗口后要怎样？',
+      subtitle: '选一次就记住，之后点 × 直接照做',
+      body: `
+        <div class="close-choice">
+          <button class="close-option" data-pick="tray">
+            <strong>收进托盘</strong>
+            <span>程序留在后台，待办提醒照常，双击托盘图标就能回来</span>
+          </button>
+          <button class="close-option" data-pick="quit">
+            <strong>直接退出</strong>
+            <span>彻底关闭，托盘图标也一起消失</span>
+          </button>
+        </div>
+        <p class="field-hint">选过之后不再询问；想改动到 设置 → 通用 → 关闭窗口时。</p>`,
+      footer: '<button class="btn" data-cancel>取消</button>',
+      onClose: () => { closeAsking = false; },
+    });
+
+    const pick = (act) => {
+      closeAsking = false;
+      modal.close();
+      // 先记到本地偏好，设置页才读得到；后端再按这个值决定收托盘还是退出
+      savePrefs({ close_action: act });
+      // 用户当时就停在设置页的话，分段控件得立刻跟着变色
+      if (currentPage() === 'settings') syncSettingsUi();
+      api('close_decision', act, true);
+    };
+    modal.el.querySelectorAll('.close-option').forEach((btn) => {
+      btn.onclick = () => pick(btn.dataset.pick);
+    });
+    modal.foot.querySelector('[data-cancel]').onclick = () => modal.close();
+  }
+
+  window.PTAskClose = askCloseAction;
+
   /* ---------------- 时间格式 ---------------- */
   const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
@@ -5730,7 +5775,10 @@
     $$('#langSeg button').forEach((b) => b.classList.toggle('active', (b.dataset.lang || 'zh') === (p.language || 'zh')));
     setSwitch($('#traySwitch'), p.tray_enabled !== false);
     setSwitch($('#minTraySwitch'), p.minimize_to_tray !== false);
-    setSwitch($('#closeTraySwitch'), p.close_to_tray === true);
+    const closeAct = p.close_action === 'tray' || p.close_action === 'quit'
+      ? p.close_action
+      : (p.close_to_tray === true ? 'tray' : 'ask');
+    $$('#closeSeg button').forEach((b) => b.classList.toggle('active', (b.dataset.act || 'ask') === closeAct));
     $$('#accentRow .sw').forEach((b) => b.classList.toggle('active', b.dataset.accent === (p.accent || 'blue')));
     $$('#densitySeg button').forEach((b) => b.classList.toggle('active', (b.dataset.density || 'normal') === (p.density || 'normal')));
     setSwitch($('#motionSwitch'), p.motion !== 'off');
@@ -5786,8 +5834,7 @@
       };
     });
     [['#traySwitch', 'tray_enabled', false],
-     ['#minTraySwitch', 'minimize_to_tray', false],
-     ['#closeTraySwitch', 'close_to_tray', true]].forEach(([sel, key, defOn]) => {
+     ['#minTraySwitch', 'minimize_to_tray', false]].forEach(([sel, key, defOn]) => {
       if (!$(sel)) return;
       $(sel).onclick = () => {
         const on = !$(sel).classList.contains('on');
@@ -5795,11 +5842,22 @@
         savePrefs({ [key]: on });
         const hint = {
           tray_enabled: on ? '托盘图标已显示，重启后生效' : '托盘图标已隐藏，重启后生效',
-          minimize_to_tray: on ? '最小化会收进托盘' : '最小化仍留在任务栏',
-          close_to_tray: on ? '点关闭会留在托盘' : '点关闭直接退出'
+          minimize_to_tray: on ? '最小化会收进托盘' : '最小化仍留在任务栏'
         }[key];
         toast(hint, 'ok', 2000);
         void defOn;
+      };
+    });
+    $$('#closeSeg button').forEach((btn) => {
+      btn.onclick = () => {
+        const act = btn.dataset.act || 'ask';
+        $$('#closeSeg button').forEach((b) => b.classList.toggle('active', b === btn));
+        savePrefs({ close_action: act === 'ask' ? '' : act });
+        toast({
+          ask: '下次点关闭时会问你',
+          tray: '现在点关闭会收进托盘',
+          quit: '现在点关闭直接退出'
+        }[act], 'ok', 2200);
       };
     });
     $$('#themeSeg button').forEach((btn) => {

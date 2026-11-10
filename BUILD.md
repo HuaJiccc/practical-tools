@@ -11,7 +11,7 @@ Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两�
 - v2.5：设置页重做为「左侧六类分类 + 右侧内容」；新增界面密度 / 界面动效 / 启动页面 / 启动最大化 / 开机自启 / 自动翻译延迟 / 导出目录 / 占用统计 / 备份数据 / 打开说明 / 复制诊断等 11 项设置。
 - v2.6：数据目录与图片保存目录都可自定义，带「恢复默认」；切换数据目录时自动搬现有数据，重启生效；默认位置不可写时自动退到 `%APPDATA%`。
 - v0.9：更名「实用工具」；新增 Inno Setup 安装程序（协议页 / 自定义目录 / 快捷方式 / 卸载项 / WebView2 检测）；安装版数据固定放 `%LOCALAPPDATA%\实用工具\data`，卸载保留；功能描述统一改写。
-- v1.0：首个对外正式版。中英文界面切换（DOM 翻译层，覆盖 500+ 条文案）；系统托盘（最小化/关闭收托盘、右键菜单）；关于页显示版本与更新说明；检查更新支持原地下载安装与跳转发布页。版本号从 3.0.0 回落到 1.0.0。
+- v1.0：首个对外正式版。中英文界面切换（DOM 翻译层，覆盖 500+ 条文案）；系统托盘（最小化/关闭收托盘、右键菜单）；关于页显示版本与更新说明；检查更新支持原地下载安装与跳转发布页。版本号从 3.0.0 回落到 1.0.0。**内核 `app/ptools` 从预编译 `.pyc` 全部重写为纯标准库源码**，仓库不再有黑盒模块；点 × 关闭改为首次二选一（收进托盘 / 直接退出），选过就记住，设置里可改回「先问我」。
 
 ## 目录
 
@@ -20,15 +20,15 @@ personaltools/
 ├─ app/
 │  ├─ app.py            入口：组装后端、起本地服务、开窗口
 │  ├─ uistore.py        界面侧独立存储（规划 / 分类 / 番茄钟 / 倒数日 / 心情 / 图表）
-│  ├─ aitranslate.py    翻译的扩展渠道（AI 接口 / 腾讯交互翻译），绕过编译好的 ptools
-│  ├─ ptools/           后端（.pyc，来自 v1.0 解包，可直接 import）
+│  ├─ aitranslate.py    翻译的扩展渠道（AI 接口 / 腾讯交互翻译），在 ptools 的四条之外另加
+│  ├─ ptools/           内核：纯标准库，无第三方依赖
 │  │  ├─ media.py       占位：影视书籍已移除，访问即抛错
 │  │  ├─ metadata.py    同上
 │  │  └─ ...            api / server / translate / todo / notes / units / currency / picker / notify ...
 │  └─ web/
 │     ├─ index.html     单页骨架，内联 SVG 图标 symbol
 │     ├─ style.css      CSS 变量主题 + 组件（纯实色，无 backdrop-filter）
-│     └─ app.js         hash 路由 + 各页逻辑，约 4300 行
+│     └─ app.js         hash 路由 + 各页逻辑，约 6200 行
 ├─ assets/icon.ico      应用图标（256/128/64/48/32/24/16，由 dev/make_icon.py 生成）
 ├─ installer/
 │  ├─ app.iss           Inno Setup 脚本：协议页 / 目录选择 / 快捷方式 / 卸载 / WebView2 检测
@@ -39,11 +39,14 @@ personaltools/
 └─ dev/                 自测脚本（截图、交互断言、打包运行、安装/卸载流程、图标生成）
 ```
 
-## uistore：不改后端也能存新数据
+## uistore：界面侧数据的落脚处
 
-`ptools` 是编译产物，字段固定、加不了新东西，所以新数据都放在 `app/uistore.py`，
-按用途各写一个 JSON，通过 `UiApi` 暴露方法给前端。写入用临时文件 + `os.replace`
-原子替换，避免中断产生半截 JSON。
+`app/uistore.py` 按用途各写一个 JSON，通过 `UiApi` 暴露方法给前端。写入用临时文件 +
+`os.replace` 原子替换，避免中断产生半截 JSON。
+
+起初这么分是因为 `ptools` 是编译产物、加不了新字段；现在 `ptools` 已经是源码，改起来没有
+门槛，但这些数据本来就只服务于界面（规划、番茄钟、偏好），留在这里省事，也不打算搬。
+真正的理由是**职责**：`ptools` 存的是"程序的数据"，`uistore` 存的是"这次界面长什么样"。
 
 | 类 | 文件 | 职责 |
 | --- | --- | --- |
@@ -92,7 +95,7 @@ python -m PyInstaller --noconfirm --clean 实用工具.spec
 
 ```bash
 ISCC.exe installer\app.iss
-# 产物：dist-installer\实用工具-3.0.0-安装程序.exe（约 15 MB）
+# 产物：dist-installer\实用工具-1.0.0-安装程序.exe（约 15 MB）
 ```
 
 设计上的几条约束，改脚本前先看：
@@ -206,9 +209,9 @@ ISCC.exe installer\app.iss
 
 ## 翻译渠道：6 条怎么接的（v2.4）
 
-`ptools/translate.pyc` 是编译产物，`PROVIDER_ORDER` / `PROVIDERS` 写死在里面，加不了新渠道。
-所以 `app/aitranslate.py` 单独实现两条，`UiApi.translate()` 先分流：认识的走新模块，
-其余原样丢给原来的 `Engine`，四个内置渠道的行为一行没动。
+`ptools/translate.py` 里 `PROVIDER_ORDER` / `PROVIDERS` 决定了内置的四条渠道，
+`app/aitranslate.py` 另外实现两条，`UiApi.translate()` 先分流：认识的走新模块，
+其余原样丢给 `Engine`，四个内置渠道的行为一行没动。
 
 - **AI 接口**（`provider="ai"`）：OpenAI 兼容 `/chat/completions`。配置直接复用已有的
   `ai_base_url` / `ai_api_key` / `ai_model` 三个键——`Settings` 有键白名单，
@@ -265,8 +268,9 @@ ISCC.exe installer\app.iss
 
 **两个坑，都踩过：**
 
-1. `ptools` 里的 `Settings` 是编译好的，只认自己那份白名单，`save_settings({'start_maximized': True})`
-   会返回 `ok` 但其实不落盘。新键别往 settings.json 塞。
+1. `ptools` 里的 `Settings` 只认自己那份白名单（`config.DEFAULT_SETTINGS`），
+   `save_settings({'start_maximized': True})` 会返回 `ok` 但其实不落盘。新键得先加进
+   `DEFAULT_SETTINGS`，否则写进去也会被丢掉——类型不符同理。
 2. **localStorage 活不过一次重启**。本地服务每次 `ApiServer.start()` 都换端口（实测 8941 / 8943），
    而 localStorage 是按「协议+主机+端口」隔离的，换个端口就是一个全新的空存储。
    所以 `savePrefs()` 除了写 localStorage，还会 350ms 防抖 `POST ui_prefs` 把整份偏好写到
@@ -316,7 +320,7 @@ ISCC.exe installer\app.iss
 | 数据目录 | `data-dir.txt`（一行纯路径，放在 EXE 旁边 / 源码时 `app/` 下） | 重启 |
 | 图片保存目录 | `data/ui_prefs.json` 的 `export_dir` | 立即 |
 
-`ptools.config.data_dir()` 的解析顺序（这个在 .pyc 里，改不了）：
+`ptools.config.data_dir()` 的解析顺序（`app/ptools/config.py`）：
 
 1. 环境变量 `PERSONALTOOLS_DATA`（测试脚本靠它隔离数据）
 2. `data-dir.txt` 第一行有效路径
@@ -325,8 +329,8 @@ ISCC.exe installer\app.iss
 
 **坑**：`data-dir.txt` 只认第一行有效路径，`#` 注释会让它整段失效。
 一开始往里写了三行注释头，界面显示切换成功、重启后却还是老目录，
-原因是 `app.py` 里的 `read_data_override()` 是逐行跳过注释的，比 `.pyc` 里的实现宽松，
-自测写成了「能读回」所以没发现。现在只写路径一行。
+原因是 `app.py` 里的 `read_data_override()` 是逐行跳过注释的，比 `config.data_dir()`
+的实现宽松，自测写成了「能读回」所以没发现。现在只写路径一行。
 
 `data_dir()` 在 **import 时就算死并存进 `_DATA_DIR`**，所以同进程内改环境变量无效，
 验证切换必须开子进程（`dev_dirs26.py` 就是这么做的）。
@@ -339,51 +343,51 @@ ISCC.exe installer\app.iss
 ```bash
 cd personaltools
 
-# 测试素材
-python dev/make_test_xlsx.py      # 造测试用 xlsx（两个工作表 / 日期列 / 200 行大表），不依赖 openpyxl
+# 内核对照测试（不开界面，最该先跑）
+python dev/dev_ptools_diff.py     # 新旧实现逐项对照，12 组 87 项
+
+# 其余后端测试
+python dev/dev_translate_extra.py # v2.4：翻译扩展渠道，本地 mock 的 AI 接口 + 真实腾讯翻译，41 项断言
+python dev/dev_dirs26.py          # v2.6：目录切换 / 恢复默认 / 非法路径拒绝，含子进程验证真的生效
+python dev/dev_settings25_api.py  # v2.5：开机自启 / 占用统计 / 备份 / 诊断，21 项断言（自启测完会还原）
+python dev/dev_update.py          # v1.0：版本比较 / 两种清单格式 / 下载与 SHA-256 校验 / 错误路径，24 项
+python dev/dev_check_assets.py    # 静态检查：SVG symbol 重复定义与悬空引用（CI 也跑这个）
 
 # 界面回归（需要桌面会话，会真开窗口）
 python dev/dev_check3.py          # v2.1：记事本分类 / 待办选时间 / 每日规划 / 转盘
 python dev/dev_check22.py         # v2.2：番茄钟 / 倒数日 / 世界时钟 / 心情 / 成图 / 全局搜索
 python dev/dev_drop_check.py      # v2.2：拖入 xlsx / csv、切工作表、60 行截断（先跑 make_test_xlsx.py）
 python dev/dev_image_probe.py     # v2.3：图片工具冒烟，三项各跑一遍并校验产物
-python dev/dev_image_stress.py    # v2.3：正式压力测试，三项各 12 用例（换规格/换底/换时长/换目标），输出 dev/_shots/v23/stress_report.json
+python dev/dev_image_stress.py    # v2.3：压力测试，三项各 12 用例，输出 dev/_shots/v23/stress_report.json
 python dev/dev_installed23.py     # v2.3：启动已安装 exe，点侧栏进图片工具再逐个切页签
-python dev/dev_tray.py            # v1.0：托盘图标、最小化收托盘、关闭留托盘、双击恢复（11 项）
+python dev/dev_tray.py            # v1.0：托盘图标、最小化收托盘、双击恢复（11 项）
+python dev/dev_close_ask.py       # v1.0：首次点 × 弹二选一、选择落盘、二次不再问、设置里可改回「先问我」（13 项）
 python dev/dev_lang.py            # v1.0：切英文逐页扫残留中文、切回中文验还原、英文溢出检测
 python dev/dev_lang_shots.py      # v1.0：英文界面各页截图 + 窗口标题跟随语言
 python dev/dev_update_ui.py       # v1.0：关于页版本 / 更新说明 / 检出新版 / 下载提示（本地 mock 更新源）
-python dev/dev_packaged_v10.py "D://安装目录"  # v1.0：打包版实测托盘与最小化
+python dev/dev_packaged_v10.py "D:/安装目录"  # v1.0：打包版实测托盘与最小化
 python dev/dev_dark_inputs.py     # v1.0：深色下时间 / 日期框背景与文字颜色（10 项）
 python dev/dev_settings25_ui.py   # v2.5：六个分类逐个点开截图 + 密度 / 动效 / 启动页 / 延迟 / 统计 / 诊断联动
 python dev/dev_dirs26_ui.py       # v2.6：数据 / 图片目录两行的路径、徽章、按钮渲染与窄窗口排版
 python dev/dev_settings25_narrow.py # v2.5：1000px 窄窗口下分类变横向页签、无横向溢出
 python dev/dev_startpage25.py set last     # v2.5：把启动页设为「上次停留」并停在记事
 python dev/dev_startpage25.py check notes  # v2.5：重启后确认真的回到记事（验证 ui_prefs.json 生效）
-python dev/dev_installer_shots.py          # v3.0：跑安装向导（欢迎 / 协议 / 目录）逐页截图并断言
-python dev/dev_uninstall_test.py "D:\测试目录"  # v3.0：卸载后程序与安装目录清空、用户数据保留
-
-# 后端（不开界面）
-python dev/dev_translate_extra.py # v2.4：翻译扩展渠道，本地 mock 的 AI 接口 + 真实腾讯翻译，41 项断言
-python dev/dev_dirs26.py          # v2.6：目录切换 / 恢复默认 / 非法路径拒绝，含子进程验证真的生效
-python dev/dev_settings25_api.py  # v2.5：开机自启 / 占用统计 / 备份 / 诊断，21 项断言（自启测完会还原）
-python dev/dev_update.py          # v1.0：版本比较 / 两种清单格式 / 下载与 SHA-256 校验 / 错误路径，24 项
+python dev/dev_installer_shots.py          # v1.0：跑安装向导（欢迎 / 协议 / 目录）逐页截图并断言
+python dev/dev_uninstall_test.py "D:/测试目录"  # v1.0：卸载后程序与安装目录清空、用户数据保留
+python dev/dev_readme_shots.py             # 重拍 docs/screenshots 里的五张图（浅色 + 中文）
 
 # 工具
+python dev/make_test_xlsx.py      # 造测试用 xlsx（两个工作表 / 日期列 / 200 行大表），不依赖 openpyxl
 python dev/make_icon.py           # 重新生成 assets/icon.ico 与预览图
 ```
 
-截图类、临时探针类脚本在整理仓库时已归档，保留的 13 个脚本及其用途见 `dev/README.md`。
+每个脚本覆盖什么、有哪些前提，见 `dev/README.md`。
 
 `dev_image_stress.py` 怎么测：`MediaRecorder` + `canvas.captureStream()` 现场录一段色相在变的测试视频，
 用真实 `DataTransfer` + 合成 `drop` 事件把文件喂给页面，前端算完把结果写进 `window.__job`，
 Python 侧轮询取值（**`evaluate_js` 对 Promise 只返回 `{}`，不能直接 await**），最后用 PIL 解码校验：
 证件照看尺寸 + 四角至少两角命中目标底色 + 中心不是底色；GIF 看尺寸/帧数 ±1/9 个采样点帧间有差异/字节数；
 压缩看结果 ≤ 目标、不低于目标 5%、最长边与格式符合。三项各 12 个用例，连跑两轮共 72 次，0 失败。
-
-`dev_focus_flow.py` 的做法：把 `app/` 复制成 `dev/_fast_app/`，只改两处
-（`FOCUS_PRESETS` 的 25 → 0.05 分钟、初始 `total/left`），跑完即可验证
-「到点 → 记账 → 通知 → 自动切短休 → 统计更新」整条链路，正式源码不受影响。
 
 截图脚本支持环境变量：`PT_DATA`（数据目录）、`PT_SHOTS`（输出目录）、`PT_PAGES`（页面列表）、`PT_THEME=dark`。
 
@@ -396,3 +400,90 @@ r = CArchiveReader('dist/实用工具.exe')
 print(r.extract('web\\\\app.js') == open('app/web/app.js','rb').read())
 "
 ```
+
+## ptools 重写：怎么保证「重写」不等于「重做」
+
+1.0.0 把 `app/ptools` 从一批没有源码的 `.pyc` 重写成了纯标准库的 `.py`。这件事的风险不在
+能不能写出来，而在**写出来的是不是原来那个行为**——凭印象补一个函数，看起来能用，
+实际上把 `clear()` 的返回值、`update()` 的标题推导、落盘顺序全都改了，界面不会报错，
+用户也看不出，直到某天数据对不上。
+
+所以做法是「先立标准，再写代码」：
+
+1. 把旧版 `ptools` 的字节码副本放到 `dev/_oracle/ptools_old/`（`.gitignore` 已排除，不进仓库）。
+2. `dev/dev_ptools_diff.py` 让新旧两套实现跑**完全相同的一串操作**，比对**返回值**和**落盘后的 JSON**。
+3. 比对前递归抹掉 `id` / `created_at` / `fetched_at` 这类每次都不一样的字段，浮点统一 round 到 9 位。
+4. 不通过的逐条查：是写错了，还是旧实现本身就是 bug。前者改代码，后者在脚本里单列一张
+   `NLPTIME_FIXED` / `EXPECTED` 表把**新行为**钉住，附上为什么不一样。
+
+这套对照抓出的问题都不是"跑不起来"，而是"跑得跟以前不一样"，例如：
+
+| 模块 | 差点写错的地方 |
+|---|---|
+| `store.History.clear()` | 返回的是**剩余条数**，不是删掉的条数 |
+| `notes.update(id, title=...)` | 不传 content 时，标题会从内容重算成「无标题」 |
+| `notes` | 保存前已按置顶 / 更新时间排过序，文件顺序 = 界面顺序 |
+| `todo.complete()` | 返回 `(完成的, 下一次)` 二元组，且排序最后一段是 `-created_at` |
+| `todo` | `get()` 返回的是副本，不是内部对象 |
+| `currency` | 少于 **5** 个币种就判失败，防止半截数据污染缓存 |
+| `aihint` | HTTP 异常不包装，直接往外抛 |
+| `server` | 空 body 是 `invalid body`，不是 `invalid json` |
+| `languages.normalize()` | 渠道会回 `en-US` 这种带地区的码，要退一步按语言主体再匹配 |
+| `nlptime` | 说了「今晚八点」却按月日 + 默认 9 点算，跨年日期不跨年 |
+
+反过来，旧实现本身就错的地方按正确语义实现，不用为了"一致"把 bug 一起搬过来：
+
+- 「今晚八点吃饭」以前算成**明天早上 8 点**，「明晚八点」同理
+- 标题里残留「中午」「明早」「每」这类时间碎片
+- 「1 月 1 日」在 11 月说，给的是今年 1 月 2 日（已经过去，被顺延了一天）
+- 「明晚」「明早」「零点」直接识别不出来
+
+数值敏感的部分单独加码：`units.format_number` 用 616 个样本（含 `1e-7`、`1e16`、`-0.0` 这类边界）逐个比，
+`languages.normalize` 用 4 渠道 × 68 个语言码的笛卡尔积比。当前 87 项全通过。
+
+## 发布前清单
+
+改版本号、出包、发 Release 的时候照这个顺序走，漏一步都会在用户那边出问题。
+
+**1. 替换更新源地址**（唯一必须手改的一行）
+
+`app/app.py` 顶部：
+
+```python
+UPDATE_REPO = "your-name/practical-tools"   # ← 换成实际仓库，形如 "octocat/practical-tools"
+```
+
+没替换也不会有 404 报错，关于页会明确说「还没有配置更新源」，但检查更新就用不了。
+
+**2. 改版本号**，三处要一致：`app/app.py` 的 `VERSION`、`installer/app.iss` 的 `#define AppVersion`、
+`CHANGELOG.md` 新开一节。`RELEASE_NOTES` 也一起改，关于页显示的就是它。
+
+**3. 出包并核对**
+
+```bash
+python dev/dev_ptools_diff.py                 # 内核对齐
+python dev/dev_check_assets.py                # 资源引用
+python -m PyInstaller --noconfirm --clean 实用工具.spec
+ISCC.exe installer\app.iss
+```
+
+安装包在 `dist-installer/`，附上 sha256：
+
+```bash
+certutil -hashfile "dist-installer\实用工具-1.0.0-安装程序.exe" SHA256
+```
+
+**4. 发 Release**：tag 用 `v1.0.0`，附件传安装包与免安装的 `实用工具.exe`，
+正文直接贴 `CHANGELOG.md` 里对应那节。检查更新走的是
+`https://api.github.com/repos/<仓库>/releases/latest`，所以 tag 必须存在、附件必须挂在
+release 上，光 push tag 不够。
+
+**5. 装一遍再卸一遍**（别只跑源码）
+
+```bash
+python dev/dev_packaged_v10.py "D:/装到的目录"
+python dev/dev_uninstall_test.py "D:/装到的目录"
+```
+
+安装包未做代码签名，首次运行会触发 SmartScreen 提示「未知发布者」，这是预期行为，
+要消掉只能买证书。

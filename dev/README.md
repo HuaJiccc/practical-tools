@@ -5,11 +5,12 @@
 
 ## 运行前提
 
-- **Python 3.13**（`app/ptools` 字节码绑定版本，3.11 / 3.12 会 `bad magic number`）
+- Python 3.10 及以上（开发与打包用 3.13）；`app/ptools` 是纯标准库源码，没有版本绑定
 - `pip install -r requirements.txt`
 - 标「需要桌面」的脚本会真开窗口，必须在有 WebView2 的 Windows 桌面会话里跑，
   无头环境 / 远程会话里会卡在等窗口
 - 脚本会往 `dev/_data*/`、`dev/_shots*/` 写临时数据，这些目录已在 `.gitignore` 里排除
+- 对照测试额外需要 `dev/_oracle/ptools_old/`（旧版字节码副本），它同样不进仓库
 
 ## 界面自测（需要桌面）
 
@@ -33,6 +34,8 @@
 | `dev_update_ui.py` | v1.0：关于页版本号、更新说明、检出新版、下载提示、英文下的状态文案（本地 mock 更新源） |
 | `dev_packaged_v10.py` | v1.0：对**已安装的 exe** 验证启动、托盘出现、最小化隐藏、双击恢复 |
 | `dev_dark_inputs.py` | v1.0：深色下时间 / 日期输入框的计算样式（背景、文字、`color-scheme`），并回切浅色确认没带坏 |
+| `dev_close_ask.py` | v1.0：点 × 首次弹二选一、选择写入 `ui_prefs`、二次关闭不再询问、设置里能改回「先问我」（13 项） |
+| `dev_readme_shots.py` | 重拍 `docs/screenshots/` 的五张图（浅色 + 中文），保证 README 与当前界面一致 |
 
 ## 后端自测（无界面，可直接跑）
 
@@ -44,6 +47,7 @@
 | `dev_check_assets.py` | 静态检查：SVG symbol 重复定义与悬空引用（CI 里也跑这个） |
 | `dev_update.py` | v1.0：版本比较、自定义清单 / GitHub Releases 两种格式、下载与 SHA-256 校验、
   404 / 断网 / 格式错误等失败路径，24 项断言 |
+| `dev_ptools_diff.py` | **内核新旧对照**：12 组 87 项，逐项比返回值与落盘 JSON。见下方说明 |
 
 ## 工具
 
@@ -53,6 +57,24 @@
 | `make_test_xlsx.py` | 造一个最小合法 xlsx（两个工作表 / 共享字符串 / 日期单元格），用于测「数据成图」 |
 | `shot_util.py` | 按窗口标题截图（GDI `PrintWindow`），供上面几个 UI 脚本复用 |
 | `dump_texts.py` | 导出各页面渲染后的所有中文文案 → `dev/_texts.json`，用来校对中英切换的覆盖面 |
+
+## 内核对照测试
+
+`dev_ptools_diff.py` 是本仓库最重要的一套测试。1.0.0 把 `app/ptools` 从没有源码的
+`.pyc` 重写成了纯标准库的 `.py`，正确性不能靠"看起来正常"来保证，只能拿旧实现当标准答案。
+
+做法：把旧版 `ptools` 的字节码副本放在 `dev/_oracle/ptools_old/`（**不进仓库**，
+`.gitignore` 已排除），脚本让两套实现跑同一串操作，抹掉 `id` / 时间戳等易变字段后
+比对返回值与落盘 JSON。
+
+```bash
+python dev/dev_ptools_diff.py
+```
+
+- 缺少 `dev/_oracle/ptools_old/` 时脚本会说明情况并返回 0，不会报错
+- 旧实现本身是 bug 的用例（例如「今晚八点」被算成明早八点），在 `NLPTIME_FIXED` /
+  `EXPECTED` 表里钉住**新行为**，并在注释里写明为什么和旧版不同
+- 改内核之后跑一遍；改文档、改界面的提交不需要跑
 
 ## 注意
 
