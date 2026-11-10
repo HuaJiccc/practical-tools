@@ -5609,8 +5609,10 @@
 
   function showUpdateFallback(res) {
     const reason = (res && res.error) || tf('feedFailed');
+    // 本来就是「没配置更新源」时，再补一句同义的话只会显得啰嗦
+    const hint = res && res.code === 'no_feed' ? '' : `<br>${esc(tf('noFeed'))}`;
     updateStatus(
-      `<b>${esc(reason)}</b><br>${esc(tf('noFeed'))}`
+      `<b>${esc(reason)}</b>${hint}`
       + '<div class="update-actions">'
       + `<button class="btn" data-upd="page">${esc(tf('openPage'))}</button>`
       + `<button class="btn" data-upd="retry">${esc(tf('retry'))}</button>`

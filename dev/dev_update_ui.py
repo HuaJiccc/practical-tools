@@ -140,6 +140,29 @@ def main():
         en_notes = js("document.querySelector('#releaseNotes').textContent") or ""
         check("英文下更新说明是英文", "first stable release" in en_notes, en_notes[:40])
 
+        # 更新源还是占位符时，要给一句能看懂的话，而不是 404
+        js("document.querySelector('#langSeg button[data-lang=\"zh\"]').click()")
+        time.sleep(0.8)
+        os.environ.pop("PT_UPDATE_FEED", None)
+        js("document.querySelector('#setRail .set-tab[data-set-tab=\"about\"]').click()")
+        time.sleep(0.6)
+        js("document.querySelector('#checkUpdate').click()")
+        time.sleep(1.6)
+        ph = js("document.querySelector('#updateStatus').textContent") or ""
+        check("占位更新源给明确提示", "还没有配置更新源" in ph and "404" not in ph,
+              ph[:50].replace("\n", " "))
+        check("占位时保留打开发布页出口",
+              js("!!document.querySelector('#updateStatus [data-upd=\"page\"]')"))
+
+        js("document.querySelector('#langSeg button[data-lang=\"en\"]').click()")
+        time.sleep(0.8)
+        js("document.querySelector('#setRail .set-tab[data-set-tab=\"about\"]').click()")
+        time.sleep(0.6)
+        js("document.querySelector('#checkUpdate').click()")
+        time.sleep(1.6)
+        ph_en = js("document.querySelector('#updateStatus').textContent") or ""
+        check("占位提示英文也翻译", "No update source" in ph_en, ph_en[:50].replace("\n", " "))
+
         js("document.querySelector('#langSeg button[data-lang=\"zh\"]').click()")
         time.sleep(0.8)
         win.destroy()

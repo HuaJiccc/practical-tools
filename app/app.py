@@ -58,11 +58,13 @@ APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
 LEGACY_APP_NAMES = ("个人工具",)
 
-# 发布到自己的仓库时，把这两行换成实际地址即可；也可以用 settings.json 里的
-# update_feed 覆盖，或临时用环境变量 PT_UPDATE_FEED 指向本地清单调试。
+# 发布到自己的仓库时，把这一行换成实际地址即可（形如 "octocat/my-tools"）；
+# 也可以用 settings.json 里的 update_feed 覆盖，
+# 或临时用环境变量 PT_UPDATE_FEED 指向本地清单调试。
 UPDATE_REPO = "your-name/practical-tools"
 UPDATE_FEED = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
 UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
+UPDATE_PLACEHOLDER = "your-name/practical-tools"
 
 # 关于页展示的本版更新说明（跟 VERSION 一起改）
 RELEASE_NOTES = """1.0 首个正式版
@@ -870,8 +872,18 @@ class UiApi:
         """查一次更新。配置错了、断网了都返回 ok=False 和一句能看懂的原因。"""
         settings = self._api.settings.all()
         feed = os.environ.get("PT_UPDATE_FEED") or settings.get("update_feed") or UPDATE_FEED
+        page = settings.get("update_page") or UPDATE_PAGE
+        # 仓库地址还是占位符时直接说明，别让人看到「404 更新源不存在」以为是坏了
+        if UPDATE_PLACEHOLDER in feed and not os.environ.get("PT_UPDATE_FEED"):
+            return {
+                "ok": False,
+                "code": "no_feed",
+                "current": VERSION,
+                "page": page,
+                "error": "还没有配置更新源：作者尚未填写发布仓库地址",
+            }
         result = updater.check(VERSION, feed)
-        result.setdefault("page", settings.get("update_page") or UPDATE_PAGE)
+        result.setdefault("page", page)
         return result
 
     def update_install(self, url="", sha256="", dry=None):
@@ -911,6 +923,8 @@ class UiApi:
         target = str(url or settings.get("update_page") or UPDATE_PAGE).strip()
         if not target.startswith(("http://", "https://")):
             return {"ok": False, "error": "发布页地址无效"}
+        if UPDATE_PLACEHOLDER in target:
+            return {"ok": False, "error": "发布页还没建好：作者尚未填写仓库地址"}
         try:
             import webbrowser
 

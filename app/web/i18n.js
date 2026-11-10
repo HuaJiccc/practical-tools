@@ -664,7 +664,34 @@
     [/^· (\d+) 个$/, '· $1'],
     [/^(\d+) 项$/, '$1 items'],
     [/^(\d+) 个文件$/, '$1 files'],
-    [/^(.+) 个选项$/, '$1 options']
+    [/^(.+) 个选项$/, '$1 options'],
+
+    // 更新相关的报错文案来自后端，英文界面下也要能看懂
+    [/^还没有配置更新源：作者尚未填写发布仓库地址$/, 'No update source yet: the release repository has not been set'],
+    [/^还没有配置更新源$/, 'No update source configured yet'],
+    [/^更新源不存在（404），检查地址是否写错$/, 'Update source not found (404)'],
+    [/^更新源拒绝访问（(\d+)）$/, 'Update source refused access ($1)'],
+    [/^更新源返回 (\d+)$/, 'Update source returned $1'],
+    [/^连不上更新源：(.*)$/, 'Cannot reach the update server: $1'],
+    [/^连接更新源超时$/, 'Connecting to the update server timed out'],
+    [/^更新源返回的不是合法 JSON$/, 'The update source did not return valid JSON'],
+    [/^更新源里没有版本信息$/, 'The update source has no version info'],
+    [/^更新源格式无法识别$/, 'Unrecognised update feed format'],
+    [/^更新源没有给出下载地址$/, 'The update source has no download link'],
+    [/^下载失败（(\d+)）$/, 'Download failed ($1)'],
+    [/^下载失败：(.*)$/, 'Download failed: $1'],
+    [/^连不上下载地址：(.*)$/, 'Cannot reach the download address: $1'],
+    [/^下载中断：(.*)$/, 'Download interrupted: $1'],
+    [/^下载到的文件不完整$/, 'The downloaded file is incomplete'],
+    [/^安装包校验失败，可能下载被截断或被替换$/, 'Checksum mismatch; the download may be truncated or replaced'],
+    [/^安装包过大（(.*) MB）$/, 'Installer is too large ($1 MB)'],
+    [/^安装包超出预期大小，已中止$/, 'Installer exceeded the expected size, aborted'],
+    [/^安装包不存在，可能已被清理$/, 'Installer is gone, it may have been cleaned up'],
+    [/^没有可下载的地址$/, 'No download link available'],
+    [/^发布页地址无效$/, 'The release page address is invalid'],
+    [/^发布页还没建好：作者尚未填写仓库地址$/, 'The release page is not published yet: the repository has not been set'],
+    [/^打开浏览器失败：(.*)$/, 'Could not open the browser: $1'],
+    [/^打开发布页失败$/, 'Could not open the release page']
   ];
 
   /* 带变量的句子没法整句查字典，单独给模板：{v} {c} 这些占位符照位置替换。 */
