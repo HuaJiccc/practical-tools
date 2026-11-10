@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-accent="blue">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>个人工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-translate" viewBox="0 0 24 24"><path d="M3 5h9"/><path d="M7.5 5v1.8c0 4-2.2 7-5 8.2"/><path d="M4.5 9.5c1.2 3 3.4 5 6.2 5.9"/><path d="m13.5 19 4-10 4 10"/><path d="M15.1 15.4h4.8"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8h4.5"/><path d="M9 12h6M9 15.5h6M9 8.5h2.5"/></symbol>
+    <symbol id="i-todo" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="m7.5 12.5 2.8 2.8 6-6.2"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><rect x="2.5" y="8.5" width="19" height="7" rx="2" transform="rotate(-8 12 12)"/><path d="M7.5 9v2.2M11 8.4v2.8M14.5 7.9V10M18 7.4v2.2"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M4 7h3.2c4.6 0 4.4 10 9 10H20"/><path d="m17.5 14.5 2.5 2.5-2.5 2.5"/><path d="M4 17h3.2c1.6 0 2.6-1.2 3.4-2.6"/><path d="M13.4 9.6C14.2 8.2 15.2 7 16.8 7H20"/><path d="m17.5 4.5 2.5 2.5-2.5 2.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 1.9"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 4 2.5 5.2 5.5.8-4 3.9.9 5.6L12 16.9 7.1 19.5l.9-5.6-4-3.9 5.5-.8z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M15 9V6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15H9"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9 7V4.8h6V7"/><path d="M6.5 7l.8 12.2h9.4L17.5 7"/><path d="M10 11v5M14 11v5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-.7 5.2 3 3.3H6.7l3-3.3z"/><path d="M12 12.5V20"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.5 7.5 0 0 1 0 10.4"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8.5h13"/><path d="m14 5.5 3 3-3 3"/><path d="M20 15.5H7"/><path d="m10 12.5-3 3 3 3"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.8 4.5v4h-4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m14 7 5 5-5 5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m14.5 6.5 3 3"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M8 3.5v4M16 3.5v4M3.5 10h17"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 2H5z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h3.4l1.8 2H18a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.4"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.8v2M12 19.2v2M4.4 4.4l1.4 1.4M18.2 18.2l1.4 1.4M2.8 12h2M19.2 12h2M4.4 19.6l1.4-1.4M18.2 5.8l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 8 4.5 12.5 9 17"/><path d="M4.5 12.5H14a5.5 5.5 0 0 1 0 11h-1.5"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="6.2" rx="7.5" ry="2.8"/><path d="M4.5 6.2v11.6c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V6.2"/><path d="M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></symbol>
+    <symbol id="i-warning" viewBox="0 0 24 24"><path d="M12 4.5 21 20H3z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3.2v3.6M16 3.2v3.6M3.5 9.6h17"/><path d="M8.3 13.3h2.1M13.6 13.3h2.1M8.3 16.9h2.1"/></symbol>
+    <symbol id="i-wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 12 5.4 8.2M12 12l6.6-3.8M12 12v8.6"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M11.7 4H5.6A1.6 1.6 0 0 0 4 5.6v6.1a2 2 0 0 0 .6 1.4l6.9 6.9a2 2 0 0 0 2.8 0l5.5-5.5a2 2 0 0 0 0-2.8l-6.9-6.9a2 2 0 0 0-1.2-.6z"/><circle cx="8.3" cy="8.3" r="1.3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10"/><path d="m8 10.5 4 4 4-4"/><path d="M4.5 18.6h15"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V5"/><path d="m8 8.5 4-4 4 4"/><path d="M4.5 18.6h15"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.4"/><path d="M4 9.2h16M9.4 9.2v11.3M4 14.8h16"/></symbol>
+    <symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 4v4M5.6 7.6l2.2 2.2M18.4 7.6l-2.2 2.2"/><path d="M4 17h16"/><path d="M7.5 17a4.5 4.5 0 0 1 9 0"/><path d="M3 20.5h18"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 10v3.8l2.6 1.6"/><path d="M9.5 3h5"/><path d="M12 3v3"/></symbol>
+    <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M7 3.5h10"/><path d="M7 20.5h10"/><path d="M8 3.5v3.2c0 2.4 4 3.6 4 5.3s-4 2.9-4 5.3v3.2"/><path d="M16 3.5v3.2c0 2.4-4 3.6-4 5.3s4 2.9 4 5.3v3.2"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.4 2.3 3.6 5.3 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.3-3.6-8.5S9.6 5.8 12 3.5z"/></symbol>
+    <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.6 14.2a4.2 4.2 0 0 0 6.8 0"/><path d="M9.2 9.4v.4M14.8 9.4v.4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.5" y="11" width="3.4" height="6.5" rx="1.2"/><rect x="10.3" y="7" width="3.4" height="10.5" rx="1.2"/><rect x="15.1" y="13" width="3.4" height="4.5" rx="1.2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.2" y="4.5" width="17.6" height="15" rx="2.6"/><circle cx="8.6" cy="9.7" r="1.5"/><path d="m4 17.5 4.6-4.3a1.7 1.7 0 0 1 2.3 0l3.2 3 1.9-1.7a1.7 1.7 0 0 1 2.3 0l2.7 2.5"/></symbol>
+    <symbol id="i-idcard" viewBox="0 0 24 24"><rect x="2.8" y="5" width="18.4" height="14" rx="2.4"/><circle cx="8.6" cy="10.4" r="2.1"/><path d="M5.2 16.2c.5-1.6 1.8-2.5 3.4-2.5s2.9.9 3.4 2.5"/><path d="M15 9.6h3.4M15 13h3.4"/></symbol>
+    <symbol id="i-gif" viewBox="0 0 24 24"><rect x="3" y="4.6" width="18" height="14.8" rx="2.6"/><path d="M10.2 9.4H8.6a1.9 1.9 0 0 0-1.9 1.9v1.4a1.9 1.9 0 0 0 1.9 1.9h1.6v-2"/><path d="M12.7 9.4v5.2"/><path d="M14.9 14.6V9.4h2.6M14.9 11.8h2.2"/></symbol>
+    <symbol id="i-compress" viewBox="0 0 24 24"><path d="M12 3.4v6.6"/><path d="m8.6 6.8 3.4 3.2 3.4-3.2"/><path d="M12 20.6V14"/><path d="m8.6 17.2 3.4-3.2 3.4 3.2"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 0 0 0 17c1.6 0 2-1 2-1.8 0-1.6 1.4-2.2 2.8-2.2h1.4a2.3 2.3 0 0 0 2.3-2.6A8.7 8.7 0 0 0 12 3.5z"/><circle cx="8.4" cy="10.2" r="1.1"/><circle cx="12" cy="7.8" r="1.1"/><circle cx="15.6" cy="10" r="1.1"/></symbol>
+  </defs>
+</svg>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="brandGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5B83FF"/>
+      <stop offset="0.55" stop-color="#3D5AF0"/>
+      <stop offset="1" stop-color="#2733B8"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32">
+          <rect width="32" height="32" rx="9" fill="url(#brandGrad)"/>
+          <rect x="7.2" y="7.2" width="7.4" height="7.4" rx="2.2" fill="#FFFFFF"/>
+          <rect x="17.4" y="7.2" width="7.4" height="7.4" rx="2.2" fill="#FFFFFF" opacity="0.92"/>
+          <rect x="7.2" y="17.4" width="7.4" height="7.4" rx="2.2" fill="#FFFFFF" opacity="0.92"/>
+          <rect x="17.4" y="17.4" width="7.4" height="7.4" rx="2.2" fill="#6FE3CE"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <strong>个人工具</strong>
+        <span>Personal Toolkit</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-group">
+        <div class="nav-label">工作区</div>
+        <a class="nav-item" href="#/home" data-nav="home"><svg><use href="#i-home"/></svg><span>概览</span></a>
+        <a class="nav-item" href="#/plan" data-nav="plan"><svg><use href="#i-plan"/></svg><span>每日规划</span><em class="nav-dot" id="navPlanDot" hidden></em></a>
+        <a class="nav-item" href="#/translate" data-nav="translate"><svg><use href="#i-translate"/></svg><span>翻译</span></a>
+        <a class="nav-item" href="#/notes" data-nav="notes"><svg><use href="#i-note"/></svg><span>记事本</span><em class="nav-badge" id="navNotes">0</em></a>
+        <a class="nav-item" href="#/todo" data-nav="todo"><svg><use href="#i-todo"/></svg><span>待办</span><em class="nav-badge" id="navTodo">0</em></a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">小工具</div>
+        <a class="nav-item" href="#/time" data-nav="time"><svg><use href="#i-timer"/></svg><span>时间</span></a>
+        <a class="nav-item" href="#/units" data-nav="units"><svg><use href="#i-ruler"/></svg><span>单位换算</span></a>
+        <a class="nav-item" href="#/picker" data-nav="picker"><svg><use href="#i-shuffle"/></svg><span>随机选择</span></a>
+        <a class="nav-item" href="#/chart" data-nav="chart"><svg><use href="#i-chart"/></svg><span>数据成图</span></a>
+        <a class="nav-item" href="#/image" data-nav="image"><svg><use href="#i-image"/></svg><span>图片工具</span></a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">记录</div>
+        <a class="nav-item" href="#/mood" data-nav="mood"><svg><use href="#i-smile"/></svg><span>心情日记</span></a>
+        <a class="nav-item" href="#/history" data-nav="history"><svg><use href="#i-clock"/></svg><span>历史记录</span></a>
+        <a class="nav-item" href="#/favorites" data-nav="favorites"><svg><use href="#i-star"/></svg><span>收藏夹</span><em class="nav-badge" id="navFav">0</em></a>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <a class="nav-item" href="#/settings" data-nav="settings"><svg><use href="#i-settings"/></svg><span>设置</span></a>
+      <div class="net-pill" id="netPill" title="点击重新检测网络"><i></i><span>检测中</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1 id="pageTitle">概览</h1>
+        <p id="pageSub">今天要做什么</p>
+      </div>
+      <div class="topbar-actions" id="pageActions">
+        <button class="cmd-open" id="cmdOpen" title="搜索全部内容（Ctrl + K）">
+          <svg><use href="#i-search"/></svg><span>搜索</span><kbd>Ctrl K</kbd>
+        </button>
+      </div>
+    </header>
+
+    <div class="scroll" id="scroll">
+      <!-- 概览 -->
+      <section class="page" data-page="home">
+        <div class="hero">
+          <div>
+            <h2 id="greeting">你好</h2>
+            <p id="greetingSub">这里是你今天的概览</p>
+          </div>
+          <div class="hero-actions">
+            <button class="btn" data-go="translate"><svg><use href="#i-translate"/></svg>翻译一段</button>
+            <button class="btn btn-primary" data-go="notes" data-new="1"><svg><use href="#i-plus"/></svg>新建笔记</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <a class="card stat" href="#/todo">
+            <span class="stat-label">今日待办</span>
+            <strong id="statToday">0</strong>
+            <span class="stat-sub" id="statTodaySub">件待处理</span>
+          </a>
+          <a class="card stat" href="#/plan">
+            <span class="stat-label">今日规划</span>
+            <strong id="statPlan">0</strong>
+            <span class="stat-sub" id="statPlanSub">项安排</span>
+          </a>
+          <a class="card stat" href="#/notes">
+            <span class="stat-label">笔记</span>
+            <strong id="statNotes">0</strong>
+            <span class="stat-sub" id="statNotesSub">篇</span>
+          </a>
+          <a class="card stat" href="#/history">
+            <span class="stat-label">翻译记录</span>
+            <strong id="statHistory">0</strong>
+            <span class="stat-sub">次翻译</span>
+          </a>
+          <a class="card stat" href="#/favorites">
+            <span class="stat-label">收藏</span>
+            <strong id="statFav">0</strong>
+            <span class="stat-sub">条</span>
+          </a>
+        </div>
+
+        <div class="home-grid">
+          <div class="card panel">
+            <div class="panel-head">
+              <div><h3>今日待办</h3><p>今天到期和已逾期的事情</p></div>
+              <a class="text-link" href="#/todo">全部<svg><use href="#i-arrow"/></svg></a>
+            </div>
+            <ul class="mini-list" id="homeTodos"></ul>
+          </div>
+          <div class="card panel">
+            <div class="panel-head"><div><h3>快捷操作</h3><p>常用入口</p></div></div>
+            <div class="quick-grid">
+              <button class="quick" data-go="plan"><svg><use href="#i-plan"/></svg><span>安排今天</span></button>
+              <button class="quick" data-go="time" data-time-tab="focus"><svg><use href="#i-timer"/></svg><span>开始专注</span></button>
+              <button class="quick" data-go="todo"><svg><use href="#i-todo"/></svg><span>添加待办</span></button>
+              <button class="quick" data-go="notes" data-new="1"><svg><use href="#i-note"/></svg><span>记一笔</span></button>
+              <button class="quick" data-go="units"><svg><use href="#i-ruler"/></svg><span>单位换算</span></button>
+              <button class="quick" data-go="picker"><svg><use href="#i-shuffle"/></svg><span>做个选择</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-grid even">
+          <div class="card panel">
+            <div class="panel-head">
+              <div><h3>最近笔记</h3><p>接着上次写</p></div>
+              <a class="text-link" href="#/notes">查看<svg><use href="#i-arrow"/></svg></a>
+            </div>
+            <ul class="mini-list" id="homeNotes"></ul>
+          </div>
+          <div class="card panel">
+            <div class="panel-head">
+              <div><h3>最近翻译</h3><p>点一条可继续编辑</p></div>
+              <a class="text-link" href="#/history">历史<svg><use href="#i-arrow"/></svg></a>
+            </div>
+            <ul class="mini-list" id="homeHistory"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 每日规划 -->
+      <section class="page" data-page="plan">
+        <div class="card plan-bar">
+          <div class="plan-date">
+            <button class="icon-btn" id="planPrev" title="前一天"><svg style="transform:rotate(90deg)"><use href="#i-chevron"/></svg></button>
+            <div class="plan-date-text">
+              <strong id="planDateLabel">—</strong>
+              <span id="planDateSub"></span>
+            </div>
+            <button class="icon-btn" id="planNext" title="后一天"><svg style="transform:rotate(-90deg)"><use href="#i-chevron"/></svg></button>
+            <button class="btn-ghost" id="planTodayBtn">回到今天</button>
+          </div>
+          <div class="plan-summary">
+            <div class="plan-summary-text"><span id="planStat">0 项安排</span><em id="planFree"></em></div>
+            <div class="plan-track"><i id="planProgress"></i></div>
+          </div>
+          <div class="plan-actions">
+            <button class="btn-ghost" id="planFromTodo"><svg><use href="#i-download"/></svg>导入待办</button>
+            <button class="btn btn-primary" id="planAdd"><svg><use href="#i-plus"/></svg>添加安排</button>
+          </div>
+        </div>
+
+        <div class="plan-layout">
+          <div class="card plan-timeline">
+            <div class="plan-topline"><span id="planHint">点时间轴空白处即可安排，点已有块可修改</span></div>
+            <div class="plan-scroll" id="planScroll">
+              <div class="plan-hours" id="planHours"></div>
+              <div class="plan-body" id="planBody">
+                <div class="plan-now" id="planNow" hidden><i></i></div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="plan-side">
+            <div class="card panel">
+              <div class="panel-head"><div><h3>今天的安排</h3><p id="planSideSub">按开始时间排序</p></div></div>
+              <ul class="plan-mini" id="planList"></ul>
+            </div>
+            <div class="card panel">
+              <div class="panel-head"><div><h3>分类用时</h3><p>每类占了多少时间</p></div></div>
+              <ul class="plan-legend" id="planCats"></ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 时间：番茄钟 / 倒数日 / 世界时钟 -->
+      <section class="page" data-page="time">
+        <div class="tabs" id="timeTabs">
+          <button class="tab active" data-tab="focus"><svg><use href="#i-timer"/></svg>番茄钟</button>
+          <button class="tab" data-tab="countdown"><svg><use href="#i-hourglass"/></svg>倒数日</button>
+          <button class="tab" data-tab="world"><svg><use href="#i-globe"/></svg>世界时钟</button>
+          <div class="tabs-right"><span class="muted" id="timeHint">计时按本机时间校准，切走也不会走偏</span></div>
+        </div>
+
+        <div class="time-panel" data-panel="focus">
+          <div class="focus-grid">
+            <div class="card focus-card">
+              <div class="focus-ring">
+                <svg viewBox="0 0 240 240">
+                  <circle class="ring-bg" cx="120" cy="120" r="104"/>
+                  <circle class="ring-fg" id="focusRing" cx="120" cy="120" r="104"/>
+                </svg>
+                <div class="focus-center">
+                  <span class="focus-mode" id="focusMode">专注</span>
+                  <strong id="focusTime">25:00</strong>
+                  <span class="focus-sub" id="focusSub">第 1 个番茄</span>
+                </div>
+              </div>
+              <input class="focus-label" id="focusLabel" maxlength="40" placeholder="这轮专注做什么？（可留空，方便事后回想）">
+              <div class="focus-actions">
+                <button class="btn btn-primary big" id="focusStart"><svg><use href="#i-play"/></svg><span>开始</span></button>
+                <button class="btn-ghost" id="focusReset"><svg><use href="#i-undo"/></svg>重置</button>
+              </div>
+              <div class="focus-modes segmented" id="focusModes">
+                <button data-preset="focus" class="active">专注 25</button>
+                <button data-preset="short">短休 5</button>
+                <button data-preset="long">长休 15</button>
+              </div>
+            </div>
+
+            <aside class="focus-side">
+              <div class="card panel">
+                <div class="panel-head"><div><h3>今天</h3><p>完成一轮自动记账</p></div></div>
+                <div class="focus-stats" id="focusStats"></div>
+              </div>
+              <div class="card panel">
+                <div class="panel-head"><div><h3>最近完成</h3><p>只记专注，不记休息</p></div></div>
+                <ul class="focus-log" id="focusLog"></ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="time-panel" data-panel="countdown" hidden>
+          <div class="card panel">
+            <div class="panel-head">
+              <div><h3>倒数日</h3><p id="cdHint">按剩余天数排序，生日类可以设成每年重复</p></div>
+              <button class="btn btn-primary" id="cdAdd"><svg><use href="#i-plus"/></svg>添加</button>
+            </div>
+            <ul class="cd-list" id="cdList"></ul>
+          </div>
+        </div>
+
+        <div class="time-panel" data-panel="world" hidden>
+          <div class="card panel world-card">
+            <div class="panel-head">
+              <div><h3>世界时钟</h3><p id="worldHint">按城市时区实时换算，夏令时自动生效</p></div>
+              <div class="inline-add"><input id="worldInput" placeholder="城市名或时区，如 东京 / Asia/Tokyo"><button class="btn" id="worldAdd">添加</button></div>
+            </div>
+            <div class="world-grid" id="worldGrid"></div>
+            <div class="world-presets" id="worldPresets"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 翻译 -->
+      <section class="page" data-page="translate">
+        <div class="card toolbar">
+          <div class="field">
+            <label>原文语言</label>
+            <div class="select-wrap"><select id="srcLang"></select><svg><use href="#i-chevron"/></svg></div>
+          </div>
+          <button class="icon-btn swap" id="swapLang" title="互换语言"><svg><use href="#i-swap"/></svg></button>
+          <div class="field">
+            <label>译文语言</label>
+            <div class="select-wrap"><select id="dstLang"></select><svg><use href="#i-chevron"/></svg></div>
+          </div>
+          <div class="toolbar-right">
+            <div class="field compact">
+              <label>翻译通道</label>
+              <div class="select-wrap"><select id="provider"></select><svg><use href="#i-chevron"/></svg></div>
+            </div>
+            <label class="switch-row"><span>自动翻译</span><button class="switch" id="autoToggle" role="switch" aria-checked="false"><i></i></button></label>
+          </div>
+        </div>
+
+        <div class="translate-grid">
+          <div class="card editor">
+            <div class="editor-head"><span class="editor-label">原文</span><span class="hint" id="srcHint">自动检测语言</span></div>
+            <textarea id="srcText" spellcheck="false" placeholder="输入或粘贴要翻译的内容&#10;Ctrl + Enter 立即翻译"></textarea>
+            <div class="editor-foot">
+              <span class="counter" id="srcCount">0 字</span>
+              <div class="foot-actions">
+                <button class="btn-ghost" id="srcClear">清空</button>
+                <button class="btn btn-primary" id="doTranslate">翻译<kbd>Ctrl ↵</kbd></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card editor">
+            <div class="editor-head"><span class="editor-label">译文</span><span class="hint" id="dstMeta"></span></div>
+            <div class="result-body" id="dstText"><div class="empty small"><svg><use href="#i-translate"/></svg><p>译文会显示在这里</p></div></div>
+            <div class="editor-foot">
+              <span class="counter" id="dstCount"></span>
+              <div class="foot-actions">
+                <button class="ghost-btn" data-dst="copy"><svg><use href="#i-copy"/></svg>复制</button>
+                <button class="ghost-btn" data-dst="speak"><svg><use href="#i-volume"/></svg>朗读</button>
+                <button class="ghost-btn" data-dst="fav"><svg><use href="#i-star"/></svg>收藏</button>
+                <button class="ghost-btn" data-dst="note"><svg><use href="#i-note"/></svg>存为笔记</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 记事本 -->
+      <section class="page" data-page="notes">
+        <div class="notes-layout">
+          <aside class="card notes-side">
+            <div class="notes-tools">
+              <div class="search"><svg><use href="#i-search"/></svg><input id="noteSearch" placeholder="搜索笔记"></div>
+              <button class="btn btn-primary icon-only" id="noteNew" title="新建笔记"><svg><use href="#i-plus"/></svg></button>
+            </div>
+            <div class="cat-bar" id="noteCats"></div>
+            <ul class="note-list" id="noteList"></ul>
+            <div class="notes-foot"><span id="noteCount">0 篇</span><span id="noteChars"></span></div>
+          </aside>
+
+          <section class="card note-editor" id="noteEditor">
+            <div class="note-tools">
+              <div class="note-tools-left">
+                <button class="ghost-btn" data-note="time"><svg><use href="#i-calendar"/></svg>时间</button>
+                <button class="ghost-btn" data-note="copy"><svg><use href="#i-copy"/></svg>复制</button>
+                <button class="ghost-btn" data-note="category"><svg><use href="#i-tag"/></svg><span id="noteCatLabel">分类</span></button>
+                <button class="ghost-btn" data-note="pin"><svg><use href="#i-pin"/></svg><span id="notePinLabel">置顶</span></button>
+                <button class="ghost-btn" data-note="translate"><svg><use href="#i-translate"/></svg>翻译</button>
+                <button class="ghost-btn danger" data-note="delete"><svg><use href="#i-trash"/></svg><span id="noteDelLabel">删除</span></button>
+              </div>
+              <span class="saved" id="noteSaved"></span>
+            </div>
+            <textarea id="noteBody" spellcheck="false" placeholder="随手记点什么，内容会自动保存"></textarea>
+            <div class="note-foot">
+              <span id="noteMeta"></span>
+              <span>标题取第一行</span>
+            </div>
+            <div class="editor-empty" id="noteEmpty">
+              <svg><use href="#i-note"/></svg>
+              <h3>还没有选中笔记</h3>
+              <p>从左边选一篇，或者新建一篇</p>
+              <button class="btn btn-primary" id="noteEmptyNew">新建笔记</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- 待办 -->
+      <section class="page" data-page="todo">
+        <div class="card composer">
+          <div class="composer-row">
+            <svg class="composer-icon"><use href="#i-plus"/></svg>
+            <input id="todoInput" placeholder="说一句话就能建任务，例如：明天下午3点提醒我取快递 #生活">
+            <button class="btn when-btn" id="todoWhen" title="自己选日期和时间"><svg><use href="#i-calendar"/></svg><span id="todoWhenLabel">选时间</span></button>
+            <button class="btn btn-primary" id="todoAdd">添加</button>
+          </div>
+          <div class="composer-hint" id="todoHint">支持 今天 / 明天 / 下周三、下午 3 点、每周一、每月 1 号、3 天后…</div>
+        </div>
+
+        <div class="tabs" id="todoTabs">
+          <button class="tab active" data-view="today">今日 <em id="tabToday">0</em></button>
+          <button class="tab" data-view="all">全部 <em id="tabAll">0</em></button>
+          <button class="tab" data-view="done">已完成 <em id="tabDone">0</em></button>
+          <div class="tabs-right">
+            <label class="select-mini"><select id="todoTag"><option value="">全部标签</option></select></label>
+            <button class="btn-ghost" id="todoClearDone" hidden>清空已完成</button>
+          </div>
+        </div>
+
+        <div class="card todo-card">
+          <ul class="todo-list" id="todoList"></ul>
+        </div>
+      </section>
+
+      <!-- 心情日记 -->
+      <section class="page" data-page="mood">
+        <div class="mood-grid">
+          <div class="card panel mood-cal">
+            <div class="panel-head">
+              <div><h3 id="moodTitle">—</h3><p id="moodSub">点一天记录，或看看这个月过得怎么样</p></div>
+              <div class="mood-nav">
+                <button class="icon-btn" id="moodPrev" title="上个月"><svg style="transform:rotate(90deg)"><use href="#i-chevron"/></svg></button>
+                <button class="btn-ghost" id="moodToday">今天</button>
+                <button class="icon-btn" id="moodNext" title="下个月"><svg style="transform:rotate(-90deg)"><use href="#i-chevron"/></svg></button>
+              </div>
+            </div>
+            <div class="mood-week" id="moodWeek"></div>
+            <div class="mood-days" id="moodDays"></div>
+            <div class="mood-legend" id="moodLegend"></div>
+          </div>
+
+          <aside class="mood-side">
+            <div class="card panel mood-edit" id="moodEdit">
+              <div class="panel-head"><div><h3 id="moodEditTitle">今天</h3><p>选个心情，再写一句话</p></div></div>
+              <div class="mood-picks" id="moodPicks"></div>
+              <textarea id="moodText" maxlength="120" spellcheck="false" placeholder="一句话记录今天，比如：把拖了两周的事做完了"></textarea>
+              <div class="mood-edit-foot">
+                <span id="moodCount">0/120</span>
+                <div class="foot-actions">
+                  <button class="btn-ghost danger" id="moodClear">删除</button>
+                  <button class="btn btn-primary" id="moodSave">保存</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card panel">
+              <div class="panel-head"><div><h3>这个月</h3><p>统计与最近记录</p></div></div>
+              <div class="mood-stats" id="moodStats"></div>
+              <ul class="mood-recent" id="moodRecent"></ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 单位换算 -->
+      <section class="page" data-page="units">
+        <div class="chips" id="unitCats"></div>
+
+        <div class="card convert">
+          <div class="convert-row">
+            <input id="convValue" inputmode="decimal" value="1" autocomplete="off" spellcheck="false">
+            <div class="select-wrap"><select id="convFrom"></select><svg><use href="#i-chevron"/></svg></div>
+          </div>
+          <button class="swap-btn" id="convSwap" title="交换单位"><svg><use href="#i-swap"/></svg></button>
+          <div class="convert-row">
+            <output id="convResult">—</output>
+            <div class="select-wrap"><select id="convTo"></select><svg><use href="#i-chevron"/></svg></div>
+          </div>
+          <div class="convert-foot">
+            <span id="convNote"></span>
+            <div class="foot-actions">
+              <button class="ghost-btn" id="convCopy"><svg><use href="#i-copy"/></svg>复制结果</button>
+              <button class="ghost-btn" id="convRefresh" hidden><svg><use href="#i-refresh"/></svg>更新汇率</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-line" id="convRecent"></div>
+
+        <div class="card panel facts">
+          <div class="panel-head">
+            <div><h3 id="factsTitle">换算对照</h3><p>点任意一行可复制数值</p></div>
+          </div>
+          <ul class="facts-list" id="factsList"></ul>
+        </div>
+      </section>
+
+      <!-- 随机选择 -->
+      <section class="page" data-page="picker">
+        <div class="picker-grid">
+          <div class="card panel">
+            <div class="panel-head">
+              <div><h3>候选项</h3><p id="pickCount">0 个选项</p></div>
+            </div>
+            <div class="inline-add">
+              <input id="pickInput" placeholder="添加一个选项，回车确认">
+              <button class="btn" id="pickAdd">添加</button>
+            </div>
+            <ul class="pick-list" id="pickList"></ul>
+            <div class="panel-foot">
+              <button class="btn-ghost danger" id="pickClear"><svg><use href="#i-trash"/></svg>清空选项</button>
+            </div>
+          </div>
+
+          <div class="card panel stage">
+            <div class="stage-head">
+              <div class="segmented" id="pickMode">
+                <button data-mode="wheel" class="active"><svg><use href="#i-wheel"/></svg>轮盘</button>
+                <button data-mode="list"><svg><use href="#i-shuffle"/></svg>列表</button>
+              </div>
+              <span class="stage-tip" id="pickModeTip">点中间开始转动</span>
+            </div>
+
+            <div class="wheel-wrap" id="wheelWrap">
+              <div class="wheel-pointer"></div>
+              <svg class="wheel" id="pickWheel" viewBox="0 0 320 320" aria-label="选择轮盘"></svg>
+              <button class="wheel-center" id="pickSpin" title="开始转动"><span>开始</span></button>
+            </div>
+
+            <div class="pick-result" id="pickResult">准备好后点下面的按钮</div>
+            <button class="btn btn-primary big" id="pickDraw">开始转动</button>
+
+            <div class="pick-history">
+              <div class="pick-history-head"><h4>抽取历史</h4><button class="link-btn" id="pickClearHist">清空</button></div>
+              <ul id="pickHistory"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 数据成图 -->
+      <section class="page" data-page="chart">
+        <div class="chart-grid">
+          <div class="card panel chart-input-card">
+            <div class="panel-head">
+              <div><h3>数据</h3><p>把 Excel / CSV 拖进来，或粘贴两列</p></div>
+            </div>
+            <div class="chart-filebar" id="chartFilebar" hidden>
+              <svg class="chart-file-ico"><use href="#i-sheet"/></svg>
+              <strong id="chartFileName">数据.xlsx</strong>
+              <span id="chartFileInfo"></span>
+              <div class="segmented small" id="chartSheets"></div>
+            </div>
+            <div class="chart-drop" id="chartDrop">
+              <textarea id="chartInput" spellcheck="false" placeholder="月份&#9;销量&#10;1月&#9;120&#10;2月&#9;132&#10;3月&#9;101"></textarea>
+              <div class="chart-drop-mask" id="chartDropMask" aria-hidden="true">
+                <svg><use href="#i-upload"/></svg>
+                <strong>松手就导入</strong>
+                <span>支持 xlsx / csv / tsv / txt</span>
+              </div>
+            </div>
+            <div class="chart-foot">
+              <span id="chartParse">等待粘贴数据</span>
+              <div class="foot-actions">
+                <button class="btn-ghost" id="chartPick"><svg><use href="#i-upload"/></svg>导入文件</button>
+                <button class="btn-ghost" id="chartSample">填入示例</button>
+                <button class="btn-ghost" id="chartClear">清空</button>
+                <button class="btn btn-primary" id="chartDraw">生成图表</button>
+              </div>
+            </div>
+            <input type="file" id="chartFile" accept=".xlsx,.xlsm,.et,.csv,.tsv,.txt,.xls" hidden>
+          </div>
+
+          <div class="card panel chart-stage">
+            <div class="panel-head">
+              <div><h3 id="chartTitle">图表</h3><p id="chartMeta">粘贴数据后点生成</p></div>
+              <div class="chart-tools">
+                <div class="segmented" id="chartTypes">
+                  <button data-type="bar" class="active">柱状</button>
+                  <button data-type="line">折线</button>
+                  <button data-type="donut">环形</button>
+                </div>
+                <button class="btn-ghost" id="chartCopy"><svg><use href="#i-copy"/></svg>复制图片</button>
+              </div>
+            </div>
+            <div class="chart-canvas" id="chartCanvas">
+              <div class="empty small"><svg><use href="#i-chart"/></svg><p>还没有数据</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 图片工具 -->
+      <section class="page" data-page="image">
+        <div class="img-tabs" id="imgTabs">
+          <button class="img-tab active" data-tool="id">
+            <svg><use href="#i-idcard"/></svg>
+            <span>证件照</span>
+            <em>一寸二寸 · 换底色</em>
+          </button>
+          <button class="img-tab" data-tool="gif">
+            <svg><use href="#i-gif"/></svg>
+            <span>视频转 GIF</span>
+            <em>截一段做成动图</em>
+          </button>
+          <button class="img-tab" data-tool="compress">
+            <svg><use href="#i-compress"/></svg>
+            <span>压缩图片</span>
+            <em>压到指定大小</em>
+          </button>
+        </div>
+
+        <!-- 证件照 -->
+        <div class="img-panel active" data-img-panel="id">
+          <div class="img-grid">
+            <div class="card panel">
+              <div class="panel-head">
+                <div><h3>照片</h3><p>拖进来或选择；拖动调整位置，滚轮缩放</p></div>
+                <button class="btn-ghost" id="idReset"><svg><use href="#i-undo"/></svg>复位</button>
+              </div>
+              <div class="img-stage" id="idStage">
+                <div class="img-drop" id="idDrop">
+                  <svg><use href="#i-idcard"/></svg>
+                  <strong>拖一张照片进来</strong>
+                  <span>jpg / png / webp，背景越干净换底越准</span>
+                  <button class="btn" id="idPick"><svg><use href="#i-upload"/></svg>选择照片</button>
+                </div>
+                <div class="id-frame" id="idFrame" hidden>
+                  <canvas id="idCanvas"></canvas>
+                </div>
+              </div>
+              <div class="img-filebar" id="idFilebar" hidden>
+                <svg class="filebar-ico"><use href="#i-image"/></svg>
+                <strong id="idFileName"></strong>
+                <span id="idFileInfo"></span>
+              </div>
+              <input type="file" id="idFile" accept="image/*" hidden>
+            </div>
+
+            <div class="card panel">
+              <div class="panel-head">
+                <div><h3>规格</h3><p>300 dpi 标准尺寸</p></div>
+                <span class="tag-soft" id="idPx">—</span>
+              </div>
+              <div class="segmented wrap" id="idSizes"></div>
+              <div class="field-block">
+                <div class="field-label">底色</div>
+                <div class="id-bgs" id="idBgs"></div>
+              </div>
+              <div class="field-block">
+                <div class="field-label">换底强度 <em id="idTolVal">34</em></div>
+                <input type="range" id="idTol" min="0" max="100" value="34">
+                <div class="field-hint">背景花就往上调；太高会咬到浅色衣服</div>
+              </div>
+              <div class="field-block">
+                <div class="field-label">大小 <em id="idZoomVal">100%</em></div>
+                <input type="range" id="idZoom" min="60" max="260" value="100">
+              </div>
+              <div class="img-actions">
+                <button class="btn btn-primary" id="idSave" disabled><svg><use href="#i-download"/></svg>保存</button>
+                <button class="btn-ghost" id="idCopy" disabled><svg><use href="#i-copy"/></svg>复制</button>
+              </div>
+              <div class="save-hint" id="idSaveHint"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 视频转 GIF -->
+        <div class="img-panel" data-img-panel="gif">
+          <div class="img-grid">
+            <div class="card panel">
+              <div class="panel-head">
+                <div><h3>视频</h3><p>mp4 / webm / mov，截一段转成动图</p></div>
+                <span class="tag-soft" id="gifMeta">—</span>
+              </div>
+              <div class="img-stage" id="gifStage">
+                <div class="img-drop" id="gifDrop">
+                  <svg><use href="#i-gif"/></svg>
+                  <strong>拖一个视频进来</strong>
+                  <span>建议 10 秒以内、画面不要太花</span>
+                  <button class="btn" id="gifPick"><svg><use href="#i-upload"/></svg>选择视频</button>
+                </div>
+                <video id="gifVideo" playsinline muted preload="auto" hidden></video>
+              </div>
+              <div class="img-filebar" id="gifFilebar" hidden>
+                <svg class="filebar-ico"><use href="#i-gif"/></svg>
+                <strong id="gifFileName"></strong>
+                <span id="gifFileInfo"></span>
+              </div>
+              <input type="file" id="gifFile" accept="video/*" hidden>
+            </div>
+
+            <div class="card panel">
+              <div class="panel-head"><div><h3>转换</h3><p>越短越清晰</p></div></div>
+              <div class="field-block">
+                <div class="field-label">起点 <em id="gifStartVal">0.0 s</em></div>
+                <input type="range" id="gifStart" min="0" max="100" value="0" step="0.1">
+              </div>
+              <div class="field-block">
+                <div class="field-label">时长 <em id="gifDurVal">3.0 s</em></div>
+                <input type="range" id="gifDur" min="0.5" max="10" value="3" step="0.5">
+              </div>
+              <div class="field-pair">
+                <div class="field-block">
+                  <div class="field-label">帧率</div>
+                  <div class="segmented small" id="gifFps">
+                    <button data-fps="8">8</button><button data-fps="10" class="active">10</button><button data-fps="15">15</button>
+                  </div>
+                </div>
+                <div class="field-block">
+                  <div class="field-label">宽度</div>
+                  <div class="segmented small" id="gifWidth">
+                    <button data-w="240">240</button><button data-w="320" class="active">320</button><button data-w="480">480</button>
+                  </div>
+                </div>
+              </div>
+              <div class="img-actions">
+                <button class="btn btn-primary" id="gifMake" disabled><svg><use href="#i-play"/></svg>生成 GIF</button>
+                <button class="btn-ghost" id="gifSave" disabled><svg><use href="#i-download"/></svg>保存</button>
+              </div>
+              <div class="gif-progress" id="gifProgress" hidden>
+                <div class="prog-bar"><i id="gifBar"></i></div>
+                <span id="gifProgressText">准备中…</span>
+              </div>
+              <div class="gif-preview" id="gifPreview" hidden>
+                <img id="gifImg" alt="GIF 预览">
+                <div class="img-meta" id="gifInfo"></div>
+              </div>
+              <div class="save-hint" id="gifSaveHint"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 压缩图片 -->
+        <div class="img-panel" data-img-panel="compress">
+          <div class="img-grid">
+            <div class="card panel">
+              <div class="panel-head">
+                <div><h3>原图</h3><p>拖进来，或点下面的按钮选择</p></div>
+                <span class="tag-soft" id="cmpOrigMeta">—</span>
+              </div>
+              <div class="img-stage" id="cmpStage">
+                <div class="img-drop" id="cmpDrop">
+                  <svg><use href="#i-compress"/></svg>
+                  <strong>拖一张图片进来</strong>
+                  <span>jpg / png / webp / bmp</span>
+                  <button class="btn" id="cmpPick"><svg><use href="#i-upload"/></svg>选择图片</button>
+                </div>
+                <div class="cmp-preview" id="cmpPreview" hidden>
+                  <img id="cmpImg" alt="压缩后的图片">
+                </div>
+              </div>
+              <div class="img-filebar" id="cmpFilebar" hidden>
+                <svg class="filebar-ico"><use href="#i-image"/></svg>
+                <strong id="cmpFileName"></strong>
+                <span id="cmpFileInfo"></span>
+              </div>
+              <input type="file" id="cmpFile" accept="image/*" hidden>
+            </div>
+
+            <div class="card panel">
+              <div class="panel-head"><div><h3>目标</h3><p>压到指定体积以内，尽量保清晰</p></div></div>
+              <div class="field-block">
+                <div class="field-label">目标大小</div>
+                <div class="size-chips" id="cmpTargets">
+                  <button data-kb="50">50 KB</button>
+                  <button data-kb="100">100 KB</button>
+                  <button data-kb="200" class="active">200 KB</button>
+                  <button data-kb="500">500 KB</button>
+                  <button data-kb="1024">1 MB</button>
+                </div>
+                <div class="num-row">
+                  <input type="number" id="cmpKb" min="10" max="20000" value="200"><span>KB</span>
+                </div>
+              </div>
+              <div class="field-block">
+                <div class="field-label">格式</div>
+                <div class="segmented small" id="cmpFmt">
+                  <button data-fmt="image/jpeg" class="active">JPEG</button><button data-fmt="image/webp">WebP</button>
+                </div>
+              </div>
+              <div class="field-block">
+                <div class="field-label">最长边不超过</div>
+                <div class="segmented small" id="cmpMax">
+                  <button data-max="0" class="active">原尺寸</button><button data-max="1920">1920</button><button data-max="1280">1280</button><button data-max="800">800</button>
+                </div>
+              </div>
+              <div class="img-actions">
+                <button class="btn btn-primary" id="cmpRun" disabled><svg><use href="#i-compress"/></svg>开始压缩</button>
+                <button class="btn-ghost" id="cmpSave" disabled><svg><use href="#i-download"/></svg>保存</button>
+              </div>
+              <div class="cmp-stat" id="cmpStat" hidden>
+                <div class="cmp-line"><span>原始</span><strong id="cmpBefore">—</strong></div>
+                <div class="cmp-line"><span>压缩后</span><strong id="cmpAfter">—</strong></div>
+                <div class="cmp-line"><span>尺寸</span><strong id="cmpSize">—</strong></div>
+                <div class="cmp-line"><span>画质</span><strong id="cmpQuality">—</strong></div>
+              </div>
+              <div class="save-hint" id="cmpSaveHint"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 历史记录 -->
+      <section class="page" data-page="history">
+        <div class="list-toolbar">
+          <div class="search grow"><svg><use href="#i-search"/></svg><input id="histSearch" placeholder="搜索原文或译文"></div>
+          <button class="btn danger-quiet" id="histClear"><svg><use href="#i-trash"/></svg>清空历史</button>
+        </div>
+        <div class="record-list" id="histList"></div>
+      </section>
+
+      <!-- 收藏夹 -->
+      <section class="page" data-page="favorites">
+        <div class="list-toolbar">
+          <div class="search grow"><svg><use href="#i-search"/></svg><input id="favSearch" placeholder="搜索收藏的翻译"></div>
+          <span class="muted" id="favCount"></span>
+        </div>
+        <div class="record-list" id="favList"></div>
+      </section>
+
+      <!-- 设置 -->
+      <section class="page" data-page="settings">
+        <div class="set-wrap">
+          <nav class="set-rail" id="setRail" role="tablist" aria-label="设置分类">
+            <button class="set-tab active" data-set-tab="look" role="tab">
+              <svg><use href="#i-palette"/></svg>
+              <span>外观</span>
+              <em>主题 · 密度 · 动效</em>
+            </button>
+            <button class="set-tab" data-set-tab="general" role="tab">
+              <svg><use href="#i-sunrise"/></svg>
+              <span>通用</span>
+              <em>启动 · 提醒</em>
+            </button>
+            <button class="set-tab" data-set-tab="trans" role="tab">
+              <svg><use href="#i-translate"/></svg>
+              <span>翻译</span>
+              <em>通道 · 语言 · 自动翻译</em>
+            </button>
+            <button class="set-tab" data-set-tab="ai" role="tab">
+              <svg><use href="#i-star"/></svg>
+              <span>AI 接口</span>
+              <em>接自己的大模型</em>
+            </button>
+            <button class="set-tab" data-set-tab="data" role="tab">
+              <svg><use href="#i-database"/></svg>
+              <span>数据</span>
+              <em>目录 · 占用 · 维护</em>
+            </button>
+            <button class="set-tab" data-set-tab="about" role="tab">
+              <svg><use href="#i-info"/></svg>
+              <span>关于</span>
+              <em>版本 · 诊断</em>
+            </button>
+            <div class="set-rail-foot">
+              <span class="set-rail-tip">所有设置即时保存，存在本机</span>
+            </div>
+          </nav>
+
+          <div class="set-body">
+            <!-- 外观 -->
+            <div class="set-pane active" data-set-pane="look">
+              <div class="set-grid">
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>主题</h3><p>配色和明暗，只影响这台电脑</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>明暗</strong><span>浅色适合白天，深色适合晚上</span></div>
+                    <div class="segmented" id="themeSeg">
+                      <button data-theme="light"><svg><use href="#i-sun"/></svg>浅色</button>
+                      <button data-theme="dark"><svg><use href="#i-moon"/></svg>深色</button>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>强调色</strong><span>按钮、选中项和高亮的颜色</span></div>
+                    <div class="swatches" id="accentRow">
+                      <button data-accent="blue" class="sw blue" title="蓝"></button>
+                      <button data-accent="teal" class="sw teal" title="青"></button>
+                      <button data-accent="amber" class="sw amber" title="琥珀"></button>
+                      <button data-accent="rose" class="sw rose" title="玫瑰"></button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>界面</h3><p>排版松紧、动画和窗口行为</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>界面密度</strong><span>紧凑模式一屏能多放几行</span></div>
+                    <div class="segmented" id="densitySeg">
+                      <button data-density="normal">标准</button>
+                      <button data-density="compact">紧凑</button>
+                    </div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>界面动效</strong><span>关掉后切换页面、弹出窗口都不再播动画</span></div>
+                    <button class="switch" id="motionSwitch" role="switch"><i></i></button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>窗口置顶</strong><span>让窗口始终显示在最前面</span></div>
+                    <button class="switch" id="pinSwitch" role="switch"><i></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 通用 -->
+            <div class="set-pane" data-set-pane="general">
+              <div class="set-grid">
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>启动</h3><p>程序打开时的样子</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>启动页面</strong><span>每次打开先进到哪一页</span></div>
+                    <div class="select-wrap narrow"><select id="startPage"></select><svg><use href="#i-chevron"/></svg></div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>启动时最大化</strong><span>省得每次再点一下最大化</span></div>
+                    <button class="switch" id="maxSwitch" role="switch"><i></i></button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>开机自启</strong><span id="autoStartHint">随 Windows 启动，不弹黑窗</span></div>
+                    <button class="switch" id="autoStartSwitch" role="switch"><i></i></button>
+                  </div>
+                </div>
+
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>提醒</h3><p>待办到点的系统通知</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>启用提醒</strong><span>到点弹出 Windows 通知</span></div>
+                    <button class="switch" id="setRemind" role="switch"><i></i></button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>测试通知</strong><span>确认系统通知能正常弹出</span></div>
+                    <button class="btn" id="testNotify">发一条试试</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 翻译 -->
+            <div class="set-pane" data-set-pane="trans">
+              <div class="set-grid">
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>默认值</h3><p>新建翻译时使用</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>默认通道</strong><span>智能选择会自动切换可用的通道</span></div>
+                    <div class="select-wrap narrow"><select id="setProvider"></select><svg><use href="#i-chevron"/></svg></div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>默认译文语言</strong><span>翻译页初始的目标语言</span></div>
+                    <div class="select-wrap narrow"><select id="setTarget"></select><svg><use href="#i-chevron"/></svg></div>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>历史保留条数</strong><span>超出后自动清理最早的记录</span></div>
+                    <input class="number-input" id="setLimit" type="number" min="20" max="2000" step="10">
+                  </div>
+                </div>
+
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>自动翻译</h3><p>打字停下来就自动翻</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>启用自动翻译</strong><span>输入框停手后自动请求译文</span></div>
+                    <button class="switch" id="setAuto" role="switch"><i></i></button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>停手多久后翻译</strong><span>太短容易打断手感，太长又慢</span></div>
+                    <div class="segmented" id="delaySeg">
+                      <button data-delay="400">0.4s</button>
+                      <button data-delay="600">0.6s</button>
+                      <button data-delay="900">0.9s</button>
+                      <button data-delay="1500">1.5s</button>
+                    </div>
+                  </div>
+                  <div class="setting-foot">
+                    <button class="btn" id="testProviders"><svg><use href="#i-refresh"/></svg>检测通道可用性</button>
+                    <span id="probeResult" class="muted"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI 接口 -->
+            <div class="set-pane" data-set-pane="ai">
+              <div class="card panel ai-panel">
+                <div class="panel-head">
+                  <div><h3>AI 翻译接口</h3><p>接自己的大模型，长句和语气更自然</p></div>
+                  <span class="tag-soft muted" id="aiState">未配置</span>
+                </div>
+                <div class="field-block">
+                  <div class="field-label">服务商<em>点一下自动填好地址和模型</em></div>
+                  <div class="ai-presets" id="aiPresets"></div>
+                </div>
+                <div class="ai-form">
+                  <div class="field-block">
+                    <div class="field-label">接口地址</div>
+                    <input type="text" id="aiBase" placeholder="https://api.deepseek.com/v1" spellcheck="false" autocomplete="off">
+                    <div class="field-hint">填到 <code>/v1</code> 即可，后面的 <code>/chat/completions</code> 会自动补上</div>
+                  </div>
+                  <div class="field-block">
+                    <div class="field-label">API Key</div>
+                    <input type="password" id="aiKey" placeholder="sk-…" spellcheck="false" autocomplete="off">
+                    <div class="field-hint">只存在本机的 settings.json 里，不会上传到别处</div>
+                  </div>
+                  <div class="field-block">
+                    <div class="field-label">模型</div>
+                    <input type="text" id="aiModel" placeholder="deepseek-chat" spellcheck="false" autocomplete="off">
+                    <div class="field-hint">不填默认 <code>gpt-4o-mini</code></div>
+                  </div>
+                </div>
+                <div class="setting-foot">
+                  <button class="btn btn-primary" id="aiSave"><svg><use href="#i-check"/></svg>保存并测试</button>
+                  <button class="btn" id="aiClear">清空</button>
+                  <span id="aiResult" class="muted"></span>
+                </div>
+              </div>
+              <div class="card panel ai-help">
+                <div class="panel-head"><div><h3>怎么填</h3><p>三个常见情况，照抄就行</p></div></div>
+                <div class="help-row"><b>任意 OpenAI 兼容接口</b><span>地址填到 <code>/v1</code>，模型填服务商文档里的名字（如 deepseek-chat、qwen-plus、glm-4-flash）。</span></div>
+                <div class="help-row"><b>本地 Ollama</b><span>地址 <code>http://127.0.0.1:11434/v1</code>，Key 随便填 <code>ollama</code>，模型填本地已拉取的（如 qwen2.5）。不联网、不花钱。</span></div>
+                <div class="help-row"><b>报错了怎么看</b><span>401 / 403 是 Key 不对或没权限；404 多半是地址少了 <code>/v1</code>；429 是额度用完或请求太频繁。</span></div>
+              </div>
+            </div>
+
+            <!-- 数据 -->
+            <div class="set-pane" data-set-pane="data">
+              <div class="set-grid">
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>存储位置</h3><p>所有数据都在本机，不上传</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>数据目录</strong><span id="dataPath" class="set-path">—</span></div>
+                    <button class="btn" id="openData"><svg><use href="#i-folder"/></svg>打开</button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>导出目录</strong><span id="exportPath" class="set-path">—</span></div>
+                    <button class="btn" id="openExports"><svg><use href="#i-download"/></svg>打开</button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>占用空间</strong><span id="dataUsage">正在统计…</span></div>
+                    <button class="btn" id="refreshUsage"><svg><use href="#i-refresh"/></svg>刷新</button>
+                  </div>
+                  <div class="usage-list" id="usageList"></div>
+                </div>
+
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>维护</h3><p>清理和重置，操作前都会再问一次</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>清空翻译历史</strong><span>收藏的内容会保留</span></div>
+                    <button class="btn danger-quiet" id="clearHistory">清空</button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>恢复默认设置</strong><span>只重置设置，不删笔记和待办</span></div>
+                    <button class="btn danger-quiet" id="resetSettings">恢复</button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>备份数据</strong><span>把 data 里的记录复制一份到 backup</span></div>
+                    <button class="btn" id="backupData"><svg><use href="#i-upload"/></svg>备份</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 关于 -->
+            <div class="set-pane" data-set-pane="about">
+              <div class="card panel about">
+                <div class="about-mark">PT</div>
+                <div class="about-text">
+                  <strong>个人工具 <span id="appVersion">2.0.0</span></strong>
+                  <p>翻译、记事、待办、单位换算、随机选择、图片工具，都放在一个窗口里。断网时除翻译和汇率外都能正常使用。</p>
+                  <div class="about-actions">
+                    <button class="btn" id="openGuide"><svg><use href="#i-note"/></svg>打开使用说明</button>
+                    <button class="btn" id="copyDiag"><svg><use href="#i-copy"/></svg>复制诊断信息</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card panel diag-panel">
+                <div class="panel-head"><div><h3>运行信息</h3><p>反馈问题时把这段贴过来就行</p></div></div>
+                <div class="diag-rows" id="diagBox"><div class="diag-row"><span>读取中…</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="modal-root" id="modalRoot"></div>
+
+<div class="cmd-root" id="cmdRoot" aria-hidden="true">
+  <div class="cmd-backdrop" data-cmd-close></div>
+  <div class="cmd-box" role="dialog" aria-modal="true" aria-label="全局搜索">
+    <div class="cmd-head">
+      <svg class="cmd-ico"><use href="#i-search"/></svg>
+      <input id="cmdInput" autocomplete="off" spellcheck="false" placeholder="搜索笔记、待办、规划、倒数日、翻译、心情…">
+      <button class="cmd-esc" data-cmd-close>Esc</button>
+    </div>
+    <ul class="cmd-list" id="cmdList"></ul>
+    <div class="cmd-foot"><span>↑ ↓ 选择 · Enter 打开 · Esc 关闭</span><span id="cmdMeta"></span></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

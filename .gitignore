@@ -1,0 +1,35 @@
+# ---------- 打包产物 ----------
+build/
+dist/
+*.manifest
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+# app/ptools 是随程序分发的预编译模块，必须保留
+!app/ptools/*.pyc
+
+# ---------- 开发用临时数据（个人笔记 / 待办 / 心情 / WebView2 缓存）----------
+dev/_data*/
+dev/_px/
+dev/_shots*/
+dev/*.log
+
+# ---------- 程序运行时生成的数据 ----------
+data/
+exports/
+
+# ---------- 系统文件 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 编辑器 ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---------- 其他 ----------
+*.log
+~$*
