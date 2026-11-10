@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 import traceback
 from pathlib import Path
@@ -38,6 +39,8 @@ from ptools.store import History, LastRecord  # noqa: E402
 from ptools.todo import Todo  # noqa: E402
 
 import aitranslate  # noqa: E402
+import update as updater  # noqa: E402
+from tray import Tray  # noqa: E402
 from uistore import (  # noqa: E402
     ChartStore,
     CountdownStore,
@@ -49,11 +52,32 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "3.0.0"
+VERSION = "1.0.0"
 APP_NAME = "实用工具"
 APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
 LEGACY_APP_NAMES = ("个人工具",)
+
+# 发布到自己的仓库时，把这两行换成实际地址即可；也可以用 settings.json 里的
+# update_feed 覆盖，或临时用环境变量 PT_UPDATE_FEED 指向本地清单调试。
+UPDATE_REPO = "your-name/practical-tools"
+UPDATE_FEED = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
+UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
+
+# 关于页展示的本版更新说明（跟 VERSION 一起改）
+RELEASE_NOTES = """1.0 首个正式版
+· 界面支持中英文切换，改完立即生效，重启也记得
+· 新增系统托盘：最小化或关闭可收进托盘，双击图标回到窗口
+· 关于页显示版本号、本次更新内容，并支持检查更新
+· 检测到新版本可原地下载安装，也可跳转到发布页手动下载
+· 数据目录与图片保存目录都能自定义，默认位置人人可用"""
+
+RELEASE_NOTES_EN = """1.0 first stable release
+- Chinese and English interface, switches instantly and is remembered
+- System tray: minimize or close to tray, double-click the icon to return
+- About page shows the version, what changed, and a manual update check
+- Updates can be downloaded and installed in place, or opened on the release page
+- Data folder and image folder are configurable, with sane defaults"""
 
 
 def _rebrand_runtime():
@@ -174,6 +198,18 @@ def install_data_dir() -> "Path | None":
     return Path(local) / APP_NAME / "data"
 
 
+def installer_data_dir():
+    """安装程序约定的数据目录：%LOCALAPPDATA%\\<产品名>\\data。
+
+    和 install_data_dir() 的区别：这里不看 exe 装在哪。用户把程序装到 D 盘时，
+    安装包写下的仍然是这个路径，界面应当把它当「默认」而不是「自定义」。
+    """
+    local = os.environ.get("LOCALAPPDATA")
+    if not local:
+        return None
+    return Path(local) / APP_NAME / "data"
+
+
 def dir_writable(path: Path) -> bool:
     """真写一个探针文件，比 os.access 可靠（Windows 上后者基本没用）。"""
     try:
@@ -264,7 +300,7 @@ class UiApi:
     不再依赖影视书籍的元数据。
     """
 
-    def __init__(self, api, plan=None, note_meta=None, focus=None, countdown=None, mood=None, chart=None, exports=None, prefs=None):
+    def __init__(self, api, plan=None, note_meta=None, focus=None, countdown=None, mood=None, chart=None, exports=None, prefs=None, tray_host=None):
         object.__setattr__(self, "_api", api)
         object.__setattr__(self, "_plan", plan)
         object.__setattr__(self, "_note_meta", note_meta)
@@ -274,6 +310,7 @@ class UiApi:
         object.__setattr__(self, "_chart", chart)
         object.__setattr__(self, "_exports", exports)
         object.__setattr__(self, "_prefs", prefs)
+        object.__setattr__(self, "_tray_host", tray_host)
         object.__setattr__(self, "_window", None)
 
     def bind_window(self, window):
@@ -462,7 +499,20 @@ class UiApi:
             return {"ok": False, "error": "偏好存储未初始化", "prefs": {}}
         if patch is None:
             return {"ok": True, "prefs": self._prefs.all()}
-        return {"ok": True, "prefs": self._prefs.update(patch)}
+        merged = self._prefs.update(patch)
+        if self._tray_host:
+            try:
+                self._tray_host.refresh_label()
+            except Exception:
+                pass
+        # 窗口标题跟着界面语言走
+        lang = str(merged.get("language") or "zh").lower()
+        if self._window:
+            try:
+                self._window.set_title(APP_NAME_EN if lang.startswith("en") else APP_NAME)
+            except Exception:
+                pass
+        return {"ok": True, "prefs": merged}
 
     # ---- v2.5：通用 / 数据 / 关于 设置项 ----
     def sys_autostart(self, enabled=None):
@@ -591,7 +641,12 @@ class UiApi:
         at_default = False
         if override:
             try:
-                at_default = Path(override).resolve() == Path(default_dir).resolve()
+                current = Path(override).resolve()
+                at_default = current == Path(default_dir).resolve()
+                inst = installer_data_dir()
+                if not at_default and inst is not None and current == inst.resolve():
+                    at_default = True
+                    default_dir = inst
             except OSError:
                 at_default = False
         return {
@@ -792,6 +847,91 @@ class UiApi:
         ]
         text = "\n".join(f"{name}：{value}" for name, value in items)
         return {"ok": True, "items": items, "text": text}
+
+    # ---- v1.0：关于页、检查更新、原地安装 ----
+
+    def app_about(self):
+        """关于页要的东西：版本、本版说明、发布页地址。"""
+        settings = self._api.settings.all()
+        prefs = self._prefs.all() if self._prefs else {}
+        lang = str(prefs.get("language") or "zh").lower()
+        return {
+            "ok": True,
+            "version": VERSION,
+            "name": APP_NAME,
+            "name_en": APP_NAME_EN,
+            "notes": RELEASE_NOTES_EN if lang.startswith("en") else RELEASE_NOTES,
+            "page": settings.get("update_page") or UPDATE_PAGE,
+            "feed": settings.get("update_feed") or UPDATE_FEED,
+            "frozen": bool(getattr(sys, "frozen", False)),
+        }
+
+    def update_check(self):
+        """查一次更新。配置错了、断网了都返回 ok=False 和一句能看懂的原因。"""
+        settings = self._api.settings.all()
+        feed = os.environ.get("PT_UPDATE_FEED") or settings.get("update_feed") or UPDATE_FEED
+        result = updater.check(VERSION, feed)
+        result.setdefault("page", settings.get("update_page") or UPDATE_PAGE)
+        return result
+
+    def update_install(self, url="", sha256="", dry=None):
+        """下载并启动安装包。源码模式下只下载不安装，方便调试。"""
+        if not str(url or "").strip():
+            return {"ok": False, "error": "没有可下载的地址"}
+        try:
+            got = updater.download(url, sha256=sha256 or "")
+        except updater.UpdateError as exc:
+            return {"ok": False, "error": str(exc)}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": f"下载失败：{exc}"}
+
+        frozen = bool(getattr(sys, "frozen", False))
+        if dry is None:
+            dry = os.environ.get("PT_UPDATE_DRY") == "1"
+        if not frozen or dry:
+            return {
+                "ok": True,
+                "downloaded": True,
+                "installed": False,
+                "path": got["path"],
+                "size": got["size"],
+                "note": "源码/调试模式：已下载，未执行安装",
+            }
+
+        try:
+            updater.launch(got["path"])
+        except updater.UpdateError as exc:
+            return {"ok": False, "error": str(exc)}
+        self._schedule_exit()
+        return {"ok": True, "downloaded": True, "installed": True, "path": got["path"], "size": got["size"]}
+
+    def update_open_page(self, url=""):
+        """打开发布页 —— 没配置更新源时的兜底路径。"""
+        settings = self._api.settings.all()
+        target = str(url or settings.get("update_page") or UPDATE_PAGE).strip()
+        if not target.startswith(("http://", "https://")):
+            return {"ok": False, "error": "发布页地址无效"}
+        try:
+            import webbrowser
+
+            webbrowser.open(target)
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": f"打开浏览器失败：{exc}"}
+        return {"ok": True, "url": target}
+
+    def _schedule_exit(self):
+        """安装程序启动后本进程要让位，否则文件被占用装不上去。"""
+
+        def bye():
+            host = self._tray_host
+            if host:
+                try:
+                    host.stop()
+                except Exception:
+                    pass
+            os._exit(0)
+
+        threading.Timer(1.2, bye).start()
 
 
     def save_settings(self, patch):
@@ -1112,10 +1252,12 @@ class UiApi:
 
 
 def icon_path():
-    for name in ("icon.ico", "icon.png"):
-        candidate = resource_dir() / "assets" / name
-        if candidate.exists():
-            return str(candidate)
+    roots = [resource_dir() / "assets", Path(__file__).resolve().parent.parent / "assets"]
+    for root in roots:
+        for name in ("icon.ico", "icon.png"):
+            candidate = root / name
+            if candidate.exists():
+                return str(candidate)
     return None
 
 
@@ -1172,7 +1314,8 @@ def build_window():
         raise SystemExit(f"缺少界面文件：{index}")
 
     exports = root / "exports"
-    ui = UiApi(api, plan, note_meta, focus, countdown, mood, chart, exports, prefs)
+    tray_host = TrayHost(None, prefs)
+    ui = UiApi(api, plan, note_meta, focus, countdown, mood, chart, exports, prefs, tray_host=tray_host)
     server = ApiServer(ui, web_dir()).start()
 
     width = int(settings.get("window_width") or 1240)
@@ -1195,7 +1338,207 @@ def build_window():
     )
     api.window = window
     ui.bind_window(window)
+    tray_host.window = window
+    window.tray_host = tray_host  # 测试脚本按二元组解包，这里挂到窗口上
     return window, settings
+
+
+class TrayHost:
+    """托盘宿主。
+
+    窗口是最小化还是收进托盘、点关闭是退出还是留下，全部读 prefs，
+    前端改完设置立刻生效，不需要重启。
+    """
+
+    LABELS = {
+        "zh": {
+            "show": "打开主窗口",
+            "settings": "设置",
+            "data": "数据目录",
+            "quit": "退出",
+            "tip": "{} · 正在后台运行",
+            "balloon_title": "{}",
+            "balloon_text": "已缩到托盘，双击图标重新打开",
+        },
+        "en": {
+            "show": "Open main window",
+            "settings": "Settings",
+            "data": "Open data folder",
+            "quit": "Quit",
+            "tip": "{} · running in background",
+            "balloon_title": "{}",
+            "balloon_text": "Minimized to tray. Double-click the icon to reopen.",
+        },
+    }
+
+    def __init__(self, window, prefs):
+        self.window = window
+        self.prefs = prefs
+        self.tray = None
+        self.quitting = False
+        self.available = False
+        self.error = ""
+        self._ballooned = False
+
+    # ------- 偏好 -------
+
+    def pref(self, key, default=False):
+        try:
+            value = self.prefs.all().get(key) if self.prefs else None
+        except Exception:
+            value = None
+        return default if value is None else bool(value)
+
+    def lang(self):
+        try:
+            value = str((self.prefs.all() if self.prefs else {}).get("language") or "zh").lower()
+        except Exception:
+            value = "zh"
+        return "en" if value.startswith("en") else "zh"
+
+    # ------- 窗口动作（可能被托盘线程调用） -------
+
+    def show_window(self):
+        def _act():
+            try:
+                state = getattr(self.window.state, "name", "") or str(self.window.state)
+                if "MINIMIZED" in state.upper():
+                    self.window.restore()
+            except Exception:
+                pass
+            try:
+                self.window.show()
+            except Exception:
+                pass
+            self._ballooned = False
+
+        threading.Thread(target=_act, name="pt-tray-show", daemon=True).start()
+
+    def hide_to_tray(self, balloon=False):
+        try:
+            self.window.hide()
+        except Exception:
+            return False
+        if balloon and self.tray and not self._ballooned:
+            self._ballooned = True
+            labels = self.LABELS[self.lang()]
+            self.tray.balloon(
+                labels["balloon_title"].format(APP_NAME), labels["balloon_text"]
+            )
+        return True
+
+    def quit(self):
+        self.quitting = True
+        self.stop()
+
+        def _act():
+            try:
+                self.window.destroy()
+            except Exception:
+                os._exit(0)
+
+        threading.Thread(target=_act, name="pt-tray-quit", daemon=True).start()
+
+    # ------- 托盘 -------
+
+    def _menu(self):
+        labels = self.LABELS[self.lang()]
+        return [
+            ("show", labels["show"]),
+            ("settings", labels["settings"]),
+            ("data", labels["data"]),
+            (None, ""),
+            ("quit", labels["quit"]),
+        ]
+
+    def start(self):
+        if not sys.platform.startswith("win"):
+            return False
+        if not self.pref("tray_enabled", True):
+            return False
+        try:
+            self.tray = Tray(APP_NAME, icon_path() or "", self._menu(), self.on_command, self.show_window)
+            self.available = bool(self.tray.start())
+            if self.available:
+                self.refresh_label()
+            else:
+                self.error = "托盘图标注册失败"
+            return self.available
+        except Exception as exc:  # noqa: BLE001
+            self.available = False
+            self.error = f"{type(exc).__name__}: {exc}"
+            return False
+
+    def stop(self):
+        if self.tray:
+            try:
+                self.tray.stop()
+            except Exception:
+                pass
+            self.tray = None
+        self.available = False
+
+    def refresh_label(self):
+        """语言变了就换菜单文案与提示。菜单是每次右键临时建的，改列表即可。"""
+        if not self.tray:
+            return
+        self.tray.menu = self._menu()
+        self.tray.title = self.LABELS[self.lang()]["tip"].format(APP_NAME)
+
+    def on_command(self, cmd):
+        if cmd == "show":
+            self.show_window()
+        elif cmd == "settings":
+            self.show_window()
+            try:
+                self.window.evaluate_js("location.hash = '#/settings'")
+            except Exception:
+                pass
+        elif cmd == "data":
+            try:
+                os.startfile(str(data_dir()))
+            except Exception:
+                pass
+        elif cmd == "quit":
+            self.quit()
+
+    # ------- 窗口事件 -------
+
+    def on_minimized(self):
+        if self.pref("minimize_to_tray", True) and self.available:
+            self.hide_to_tray(balloon=True)
+
+    def on_closing(self):
+        if self.quitting:
+            return True
+        if self.pref("close_to_tray", False) and self.available:
+            # closing 是阻塞事件，回调跑在 WinForms 的 UI 线程上。
+            # 在这里直接 hide() 会去 Invoke 同一个线程，把消息泵卡住，
+            # 窗口虽然藏起来了但界面就不再响应。所以返回后另起线程收窗口。
+            def later():
+                time.sleep(0.05)
+                self.hide_to_tray(balloon=True)
+
+            threading.Thread(target=later, name="pt-tray-hide", daemon=True).start()
+            return False  # 取消关闭
+        return True
+
+
+def attach_tray(window):
+    """启动托盘并把窗口事件挂上。main() 与自测脚本共用这一段。"""
+    host = getattr(window, "tray_host", None)
+    if not host:
+        return None
+    try:
+        host.start()
+    except Exception as exc:  # noqa: BLE001
+        host.error = f"start: {type(exc).__name__}: {exc}"
+    try:
+        window.events.minimized += host.on_minimized
+        window.events.closing += host.on_closing
+    except Exception as exc:  # noqa: BLE001
+        host.error += f" | events: {type(exc).__name__}: {exc}"
+    return host
 
 
 def main():
@@ -1212,13 +1555,22 @@ def main():
             pass
         raise
 
+    tray_host = getattr(window, 'tray_host', None)
+
+    def after_start():
+        attach_tray(window)
+
     webview.start(
+        func=after_start,
         gui="edgechromium",
         debug=os.environ.get("PT_DEBUG") == "1",
         private_mode=False,
         storage_path=str(data_dir() / "webview"),
         icon=icon_path(),
     )
+
+    if tray_host:
+        tray_host.stop()
 
     try:
         if window and not window.maximized:

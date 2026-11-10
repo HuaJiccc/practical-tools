@@ -892,6 +892,13 @@
                 <div class="card panel">
                   <div class="panel-head"><div><h3>主题</h3><p>配色和明暗，只影响这台电脑</p></div></div>
                   <div class="setting-row">
+                    <div class="setting-text"><strong>界面语言</strong><span>切换后立即生效，重启也会记住</span></div>
+                    <div class="segmented" id="langSeg">
+                      <button data-lang="zh">中文</button>
+                      <button data-lang="en">English</button>
+                    </div>
+                  </div>
+                  <div class="setting-row">
                     <div class="setting-text"><strong>明暗</strong><span>浅色适合白天，深色适合晚上</span></div>
                     <div class="segmented" id="themeSeg">
                       <button data-theme="light"><svg><use href="#i-sun"/></svg>浅色</button>
@@ -946,6 +953,22 @@
                   <div class="setting-row">
                     <div class="setting-text"><strong>开机自启</strong><span id="autoStartHint">随 Windows 启动，不弹黑窗</span></div>
                     <button class="switch" id="autoStartSwitch" role="switch"><i></i></button>
+                  </div>
+                </div>
+
+                <div class="card panel">
+                  <div class="panel-head"><div><h3>窗口与托盘</h3><p>关掉窗口之后程序留不留在后台</p></div></div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>显示托盘图标</strong><span>在任务栏右下角常驻一个图标</span></div>
+                    <button class="switch" id="traySwitch" role="switch"><i></i></button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>最小化到托盘</strong><span>点最小化时收进托盘，不占任务栏</span></div>
+                    <button class="switch" id="minTraySwitch" role="switch"><i></i></button>
+                  </div>
+                  <div class="setting-row">
+                    <div class="setting-text"><strong>关闭窗口时留在托盘</strong><span>点 × 不退出程序，双击托盘图标可回来</span></div>
+                    <button class="switch" id="closeTraySwitch" role="switch"><i></i></button>
                   </div>
                 </div>
 
@@ -1104,13 +1127,19 @@
               <div class="card panel about">
                 <div class="about-mark">UT</div>
                 <div class="about-text">
-                  <strong>实用工具 <span id="appVersion">3.0.0</span></strong>
+                  <strong>实用工具 <span id="appVersion">1.0.0</span></strong>
                   <p>集翻译、记事、待办、时间管理、单位换算、数据成图与图片处理于一体，13 项工具统一在一个窗口内运行。数据保存在本机，断网时除翻译与汇率外均可正常使用。</p>
                   <div class="about-actions">
+                    <button class="btn" id="checkUpdate"><svg><use href="#i-refresh"/></svg><span id="checkUpdateText">检查更新</span></button>
                     <button class="btn" id="openGuide"><svg><use href="#i-note"/></svg>打开使用说明</button>
                     <button class="btn" id="copyDiag"><svg><use href="#i-copy"/></svg>复制诊断信息</button>
                   </div>
+                  <div class="update-status" id="updateStatus" hidden></div>
                 </div>
+              </div>
+              <div class="card panel">
+                <div class="panel-head"><div><h3>更新说明</h3><p>这一版改了什么</p></div><span class="set-badge" id="aboutVersionBadge">v1.0.0</span></div>
+                <div class="release-notes" id="releaseNotes">读取中…</div>
               </div>
               <div class="card panel diag-panel">
                 <div class="panel-head"><div><h3>运行信息</h3><p>反馈问题时把这段贴过来就行</p></div></div>
@@ -1140,6 +1169,7 @@
   </div>
 </div>
 
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

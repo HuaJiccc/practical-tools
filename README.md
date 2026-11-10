@@ -10,7 +10,7 @@ no account, no cloud, everything stays on your disk.
 
 ## 下载与安装
 
-到 [Releases](../../releases) 下载 `实用工具-3.0.0-安装程序.exe`，双击按向导完成安装。
+到 [Releases](../../releases) 下载 `实用工具-1.0.0-安装程序.exe`，双击按向导完成安装。
 
 | 项目 | 说明 |
 |---|---|
@@ -55,6 +55,15 @@ no account, no cloud, everything stays on your disk.
 | **收藏夹** | 长期保存，不受自动清理影响 |
 
 全局搜索 `Ctrl+K`，支持深色 / 浅色主题、四套强调色、界面密度与动效开关。
+
+### 界面语言与托盘
+
+- **中文 / English 即时切换**：设置 → 外观 → 界面语言。不用重启，窗口标题、
+  托盘菜单、关于页内容都跟着变，选择会被记住。
+- **常驻托盘**：最小化默认收进托盘；可在 设置 → 通用 → 窗口与托盘 里改成
+  「关闭时留在托盘」。左键单击托盘图标回到窗口，右键菜单可打开设置、打开数据目录或退出。
+- **检查更新**：关于页可以查是否有新版本。有新版时能直接下载并启动安装程序，
+  也可以打开发布页手动下载。
 
 ## 界面
 
@@ -114,11 +123,13 @@ app/
   app.py           入口：创建窗口、注入 UiApi、起本地 HTTP 服务
   aitranslate.py   翻译的扩展通道（AI 接口 / 腾讯交互翻译）
   uistore.py       界面侧独立存储（规划 / 分类 / 番茄钟 / 倒数日 / 心情 / 图表 / 偏好）
+  tray.py          系统托盘（Shell_NotifyIcon，纯 ctypes，不依赖 pystray）
+  update.py        检查更新与下载安装包（支持自定义清单与 GitHub Releases 两种格式）
   ptools/          核心逻辑（大部分为预编译模块，见下）
-  web/             前端：index.html + style.css + app.js，无框架
+  web/             前端：index.html + style.css + app.js + i18n.js，无框架
 assets/            应用图标
 installer/         安装程序脚本与许可协议文本
-dev/               自测脚本 19 个：功能回归、图片压力测试、安装/卸载流程（见 dev/README.md）
+dev/               自测脚本 22 个：功能回归、图片压测、托盘、语言、更新、安装/卸载（见 dev/README.md）
 docs/              截图与使用说明
 ```
 

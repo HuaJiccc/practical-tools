@@ -2,7 +2,7 @@
 ;  实用工具 安装脚本（Inno Setup 6.7 及以上）
 ;
 ;  编译：ISCC.exe installer\app.iss
-;  产物：dist-installer\实用工具-3.0.0-安装程序.exe
+;  产物：dist-installer\实用工具-1.0.0-安装程序.exe
 ;
 ;  设计要点：
 ;    · 按当前用户安装，默认不弹 UAC；装到 Program Files 时才需要管理员
@@ -11,7 +11,7 @@
 ; ============================================================
 
 #define AppName "实用工具"
-#define AppVersion "3.0.0"
+#define AppVersion "1.0.0"
 #define AppExe "实用工具.exe"
 #define AppId "{{7C4A1F52-9E3B-4F0A-9D21-2B77C5E8A641}"
 

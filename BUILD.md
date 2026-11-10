@@ -1,4 +1,4 @@
-# 实用工具 3.0 — 源码说明
+# 实用工具 1.0 — 源码说明
 
 Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两者通过本机回环 HTTP 通信（`POST /api/<method>`，带 `X-Token`）。
 
@@ -10,7 +10,8 @@ Windows 桌面小工具。界面是本地 HTML/CSS/JS，逻辑在 Python，两�
 - v2.4：翻译通道扩到 6 条——新增「腾讯交互翻译」（免 key）和「AI 接口」（OpenAI 兼容，自带 7 个服务商预设），智能选择增加兜底。
 - v2.5：设置页重做为「左侧六类分类 + 右侧内容」；新增界面密度 / 界面动效 / 启动页面 / 启动最大化 / 开机自启 / 自动翻译延迟 / 导出目录 / 占用统计 / 备份数据 / 打开说明 / 复制诊断等 11 项设置。
 - v2.6：数据目录与图片保存目录都可自定义，带「恢复默认」；切换数据目录时自动搬现有数据，重启生效；默认位置不可写时自动退到 `%APPDATA%`。
-- v3.0：更名「实用工具」；新增 Inno Setup 安装程序（协议页 / 自定义目录 / 快捷方式 / 卸载项 / WebView2 检测）；安装版数据固定放 `%LOCALAPPDATA%\实用工具\data`，卸载保留；功能描述统一改写。
+- v0.9：更名「实用工具」；新增 Inno Setup 安装程序（协议页 / 自定义目录 / 快捷方式 / 卸载项 / WebView2 检测）；安装版数据固定放 `%LOCALAPPDATA%\实用工具\data`，卸载保留；功能描述统一改写。
+- v1.0：首个对外正式版。中英文界面切换（DOM 翻译层，覆盖 500+ 条文案）；系统托盘（最小化/关闭收托盘、右键菜单）；关于页显示版本与更新说明；检查更新支持原地下载安装与跳转发布页。版本号从 3.0.0 回落到 1.0.0。
 
 ## 目录
 
@@ -348,6 +349,11 @@ python dev/dev_drop_check.py      # v2.2：拖入 xlsx / csv、切工作表、60
 python dev/dev_image_probe.py     # v2.3：图片工具冒烟，三项各跑一遍并校验产物
 python dev/dev_image_stress.py    # v2.3：正式压力测试，三项各 12 用例（换规格/换底/换时长/换目标），输出 dev/_shots/v23/stress_report.json
 python dev/dev_installed23.py     # v2.3：启动已安装 exe，点侧栏进图片工具再逐个切页签
+python dev/dev_tray.py            # v1.0：托盘图标、最小化收托盘、关闭留托盘、双击恢复（11 项）
+python dev/dev_lang.py            # v1.0：切英文逐页扫残留中文、切回中文验还原、英文溢出检测
+python dev/dev_lang_shots.py      # v1.0：英文界面各页截图 + 窗口标题跟随语言
+python dev/dev_update_ui.py       # v1.0：关于页版本 / 更新说明 / 检出新版 / 下载提示（本地 mock 更新源）
+python dev/dev_packaged_v10.py "D://安装目录"  # v1.0：打包版实测托盘与最小化
 python dev/dev_settings25_ui.py   # v2.5：六个分类逐个点开截图 + 密度 / 动效 / 启动页 / 延迟 / 统计 / 诊断联动
 python dev/dev_dirs26_ui.py       # v2.6：数据 / 图片目录两行的路径、徽章、按钮渲染与窄窗口排版
 python dev/dev_settings25_narrow.py # v2.5：1000px 窄窗口下分类变横向页签、无横向溢出
@@ -360,6 +366,7 @@ python dev/dev_uninstall_test.py "D:\测试目录"  # v3.0：卸载后程序与�
 python dev/dev_translate_extra.py # v2.4：翻译扩展渠道，本地 mock 的 AI 接口 + 真实腾讯翻译，41 项断言
 python dev/dev_dirs26.py          # v2.6：目录切换 / 恢复默认 / 非法路径拒绝，含子进程验证真的生效
 python dev/dev_settings25_api.py  # v2.5：开机自启 / 占用统计 / 备份 / 诊断，21 项断言（自启测完会还原）
+python dev/dev_update.py          # v1.0：版本比较 / 两种清单格式 / 下载与 SHA-256 校验 / 错误路径，24 项
 
 # 工具
 python dev/make_icon.py           # 重新生成 assets/icon.ico 与预览图

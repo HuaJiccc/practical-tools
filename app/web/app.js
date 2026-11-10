@@ -232,6 +232,11 @@
     settings: { title: '设置', sub: '外观、通用、翻译、接口与数据' },
   };
 
+  /** 取当前语言下的文案；没装 i18n 时原样返回。 */
+  function tr(text) {
+    return window.PTI18n ? window.PTI18n.t(text) : text;
+  }
+
   /* ---------------- 偏好 ---------------- */
   const PREF_KEY = 'personal-tools.prefs';
 
@@ -268,6 +273,9 @@
     document.documentElement.dataset.accent = p.accent || 'blue';
     document.documentElement.dataset.density = p.density === 'compact' ? 'compact' : 'normal';
     document.documentElement.dataset.motion = p.motion === 'off' ? 'off' : 'on';
+    const lang = p.language === 'en' ? 'en' : 'zh';
+    document.documentElement.dataset.lang = lang;
+    if (window.PTI18n && window.PTI18n.lang !== lang) window.PTI18n.setLang(lang, { silent: true });
     api('ui_theme', theme);
     clearTimeout(applyPrefs.retry);
     applyPrefs.retry = setTimeout(() => api('ui_theme', theme), 900);
@@ -304,8 +312,8 @@
     const page = currentPage();
     $$('.page').forEach((el) => el.classList.toggle('active', el.dataset.page === page));
     $$('[data-nav]').forEach((el) => el.classList.toggle('active', el.dataset.nav === page));
-    $('#pageTitle').textContent = PAGES[page].title;
-    $('#pageSub').textContent = PAGES[page].sub;
+    $('#pageTitle').textContent = tr(PAGES[page].title);
+    $('#pageSub').textContent = tr(PAGES[page].sub);
     $('#scroll').scrollTop = 0;
     savePrefs({ lastPage: page });
 
@@ -5430,7 +5438,10 @@
       loadDirs();
       refreshUsage();
     }
-    if (name === 'about') loadDiag();
+    if (name === 'about') {
+      loadDiag();
+      loadAbout();
+    }
   }
 
   function fillStartPages() {
@@ -5567,6 +5578,135 @@
     }
   }
 
+  /* ---------------- 关于与更新 ---------------- */
+
+  async function loadAbout() {
+    const res = await api('app_about');
+    if (!res || !res.ok) return null;
+    state.about = res;
+    if ($('#appVersion')) $('#appVersion').textContent = res.version;
+    if ($('#aboutVersionBadge')) $('#aboutVersionBadge').textContent = `v${res.version}`;
+    if ($('#releaseNotes')) {
+      $('#releaseNotes').innerHTML = (res.notes || '')
+        .split('\n')
+        .map((line) => (line.trim() ? `<span class="rn-line">${esc(line)}</span>` : ''))
+        .join('');
+    }
+    return res;
+  }
+
+  function tf(key, params) {
+    return window.PTI18n ? window.PTI18n.tf(key, params) : key;
+  }
+
+  function updateStatus(html, kind) {
+    const box = $('#updateStatus');
+    if (!box) return;
+    box.hidden = false;
+    box.className = `update-status ${kind || ''}`.trim();
+    box.innerHTML = html;
+  }
+
+  function showUpdateFallback(res) {
+    const reason = (res && res.error) || tf('feedFailed');
+    updateStatus(
+      `<b>${esc(reason)}</b><br>${esc(tf('noFeed'))}`
+      + '<div class="update-actions">'
+      + `<button class="btn" data-upd="page">${esc(tf('openPage'))}</button>`
+      + `<button class="btn" data-upd="retry">${esc(tf('retry'))}</button>`
+      + '</div>',
+      'warn'
+    );
+    bindUpdateActions();
+  }
+
+  function bindUpdateActions() {
+    $$('#updateStatus [data-upd]').forEach((btn) => {
+      btn.onclick = () => {
+        const action = btn.dataset.upd;
+        if (action === 'page') {
+          api('update_open_page', state.about ? state.about.page : '').then((r) => {
+            if (!r || !r.ok) toast((r && r.error) || '打开发布页失败', 'err', 3000);
+          });
+        }
+        if (action === 'retry') runCheckUpdate();
+        if (action === 'install') installUpdate(btn.dataset.url || '', btn.dataset.sha || '');
+      };
+    });
+  }
+
+  async function runCheckUpdate() {
+    const btn = $('#checkUpdate');
+    const label = $('#checkUpdateText');
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = tr('检查中…');
+    updateStatus(esc(tf('checking')), '');
+
+    const res = await api('update_check');
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = tr('检查更新');
+
+    if (!res || !res.ok) {
+      showUpdateFallback(res || {});
+      return;
+    }
+    if (!res.has_update) {
+      updateStatus(`<b>${esc(tf('upToDate', { v: res.current }))}</b>`, 'ok');
+      return;
+    }
+
+    const notes = (res.notes || '').trim();
+    const brief = notes
+      ? esc(notes.split('\n').slice(0, 4).join('\n')).replace(/\n/g, '<br>')
+      : esc(tf('noNotes'));
+    updateStatus(
+      `<b>${esc(tf('newVersion', { v: res.latest, c: res.current }))}</b><br>${brief}`
+      + '<div class="update-actions">'
+      + (res.url
+        ? `<button class="btn primary" data-upd="install" data-url="${esc(res.url)}" data-sha="${esc(res.sha256 || '')}">${esc(tf('updateNow'))}</button>`
+        : '')
+      + `<button class="btn" data-upd="page">${esc(tf('openPage'))}</button>`
+      + '</div>',
+      res.url ? 'ok' : 'warn'
+    );
+    if (!res.url) {
+      updateStatus(
+        `<b>${esc(tf('newVersion', { v: res.latest, c: res.current }))}</b><br>${brief}`
+        + `<br>${esc(tf('noInstaller'))}`
+        + '<div class="update-actions">'
+        + `<button class="btn" data-upd="page">${esc(tf('openPage'))}</button>`
+        + '</div>',
+        'warn'
+      );
+    }
+    bindUpdateActions();
+  }
+
+  async function installUpdate(url, sha) {
+    const btn = $('#checkUpdate');
+    if (btn) btn.disabled = true;
+    updateStatus(esc(tf('downloading')), '');
+
+    const res = await api('update_install', url, sha || '');
+    if (btn) btn.disabled = false;
+
+    if (!res || !res.ok) {
+      updateStatus(`<b>${esc(tf('installFailed'))}</b><br>${esc((res && res.error) || '')}`
+        + '<div class="update-actions">'
+        + `<button class="btn" data-upd="page">${esc(tf('manual'))}</button>`
+        + '</div>', 'err');
+      bindUpdateActions();
+      return;
+    }
+    if (res.installed) {
+      updateStatus(`<b>${esc(tf('installStarted'))}</b>`, 'ok');
+      return;
+    }
+    const mb = res.size ? (res.size / 1048576).toFixed(1) : '?';
+    updateStatus(`<b>${esc(tf('downloaded', { size: mb }))}</b><br>`
+      + `<span class="set-note">${esc(res.path || '')}</span>`, 'ok');
+  }
+
   async function loadDiag() {
     const box = $('#diagBox');
     if (!box) return;
@@ -5585,6 +5725,10 @@
     const s = state.settings || {};
     const p = prefs();
     $$('#themeSeg button').forEach((b) => b.classList.toggle('active', b.dataset.theme === (p.theme || 'light')));
+    $$('#langSeg button').forEach((b) => b.classList.toggle('active', (b.dataset.lang || 'zh') === (p.language || 'zh')));
+    setSwitch($('#traySwitch'), p.tray_enabled !== false);
+    setSwitch($('#minTraySwitch'), p.minimize_to_tray !== false);
+    setSwitch($('#closeTraySwitch'), p.close_to_tray === true);
     $$('#accentRow .sw').forEach((b) => b.classList.toggle('active', b.dataset.accent === (p.accent || 'blue')));
     $$('#densitySeg button').forEach((b) => b.classList.toggle('active', (b.dataset.density || 'normal') === (p.density || 'normal')));
     setSwitch($('#motionSwitch'), p.motion !== 'off');
@@ -5629,6 +5773,33 @@
       btn.onclick = () => setSettingsTab(btn.dataset.setTab);
     });
 
+    $$('#langSeg button').forEach((btn) => {
+      btn.onclick = () => {
+        const next = btn.dataset.lang === 'en' ? 'en' : 'zh';
+        savePrefs({ language: next });
+        applyPrefs();
+        syncSettingsUi();
+        route();
+        toast(next === 'en' ? 'Language switched to English' : '已切换为中文', 'ok', 1800);
+      };
+    });
+    [['#traySwitch', 'tray_enabled', false],
+     ['#minTraySwitch', 'minimize_to_tray', false],
+     ['#closeTraySwitch', 'close_to_tray', true]].forEach(([sel, key, defOn]) => {
+      if (!$(sel)) return;
+      $(sel).onclick = () => {
+        const on = !$(sel).classList.contains('on');
+        setSwitch($(sel), on);
+        savePrefs({ [key]: on });
+        const hint = {
+          tray_enabled: on ? '托盘图标已显示，重启后生效' : '托盘图标已隐藏，重启后生效',
+          minimize_to_tray: on ? '最小化会收进托盘' : '最小化仍留在任务栏',
+          close_to_tray: on ? '点关闭会留在托盘' : '点关闭直接退出'
+        }[key];
+        toast(hint, 'ok', 2000);
+        void defOn;
+      };
+    });
     $$('#themeSeg button').forEach((btn) => {
       btn.onclick = () => {
         savePrefs({ theme: btn.dataset.theme });
@@ -5852,6 +6023,9 @@
         if (res && res.ok) toast(`已备份 ${res.count} 个文件到 data\\backup`, 'ok', 3200);
         else toast((res && res.error) || '备份失败', 'err', 3600);
       };
+    }
+    if ($('#checkUpdate')) {
+      $('#checkUpdate').onclick = () => runCheckUpdate();
     }
     if ($('#openGuide')) {
       $('#openGuide').onclick = async () => {
