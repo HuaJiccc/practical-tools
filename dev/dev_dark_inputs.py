@@ -123,8 +123,6 @@ def main():
 
         js("document.querySelector('.modal-close')?.click()")
         time.sleep(0.4)
-        # 恢复深色偏好，别影响用户下次打开
-        js("document.querySelector('#themeSeg button[data-theme=\"dark\"]').click()") if False else None
         win.destroy()
 
     webview.start(func=on_start, gui="edgechromium")

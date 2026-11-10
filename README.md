@@ -71,9 +71,11 @@ no account, no cloud, everything stays on your disk.
 |---|---|
 | ![翻译](docs/screenshots/translate.png) | ![图片工具](docs/screenshots/image.png) |
 
-| 设置 |
-|---|
-| ![设置](docs/screenshots/settings.png) |
+| 设置 | 关于 |
+|---|---|
+| ![设置](docs/screenshots/settings.png) | ![关于](docs/screenshots/about.png) |
+
+截图均为浅色主题 + 中文界面；深色主题与英文界面在设置里一键切换。
 
 ## 实现上的几个选择
 
