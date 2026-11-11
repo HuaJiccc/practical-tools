@@ -14,7 +14,7 @@ on your own disk. No account, no telemetry, nothing uploaded.
 Built with Python and pywebview. The backend uses only the Python standard library: no compiled
 modules, no bundled ffmpeg, no CDN assets. MIT licensed.
 
-![Main window](docs/screenshots/home.png)
+![Main window](docs/screenshots/home-en.png)
 
 ## Download and install
 
@@ -87,11 +87,11 @@ Global search on `Ctrl+K`. Dark and light themes, four accent colours, adjustabl
 
 | Translate | Image tools |
 |---|---|
-| ![Translate](docs/screenshots/translate.png) | ![Image tools](docs/screenshots/image.png) |
+| ![Translate](docs/screenshots/translate-en.png) | ![Image tools](docs/screenshots/image-en.png) |
 
 | Settings | About |
 |---|---|
-| ![Settings](docs/screenshots/settings.png) | ![About](docs/screenshots/about.png) |
+| ![Settings](docs/screenshots/settings-en.png) | ![About](docs/screenshots/about-en.png) |
 
 All screenshots are the light theme with the Chinese UI; both switch from Settings.
 

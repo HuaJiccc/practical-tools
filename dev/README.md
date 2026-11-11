@@ -35,7 +35,7 @@
 | `dev_packaged_v10.py` | v1.0：对**已安装的 exe** 验证启动、托盘出现、最小化隐藏、双击恢复 |
 | `dev_dark_inputs.py` | v1.0：深色下时间 / 日期输入框的计算样式（背景、文字、`color-scheme`），并回切浅色确认没带坏 |
 | `dev_close_ask.py` | v1.0：点 × 首次弹二选一、选择写入 `ui_prefs`、二次关闭不再询问、设置里能改回「先问我」（13 项） |
-| `dev_readme_shots.py` | 重拍 `docs/screenshots/` 的五张图（浅色 + 中文），保证 README 与当前界面一致 |
+| `dev_readme_shots.py` | 重拍 `docs/screenshots/` 的五张图（浅色 + 中文，README.md 用）；带参数 `en` 则拍英文版 `*-en.png`，供 README.en.md 使用 |
 
 ## 后端自测（无界面，可直接跑）
 
