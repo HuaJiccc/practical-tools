@@ -99,11 +99,12 @@ def normalize(data):
     if data.get("tag_name"):
         # GitHub 的 assets 是倒序返回的（最后上传的排前面），不能直接取第一个：
         # release 里通常同时躺着安装包和免安装版，取错就会「下载了但没装上」。
-        # 先按名字认安装包，认不出来再退回第一个可下载的 exe/msi。
+        # 判定顺序：名字能认出安装包就用它；认不出（比如上传时文件名被吃掉，
+        # 变成 "--.exe"）就挑体积最大的，安装包必然大于免安装版；只剩免安装
+        # 时才退而求其次。
         url = ""
         sha = ""
-        fallback = ""
-        fallback_sha = ""
+        candidates = []
         last = ""
         last_sha = ""
         for asset in data.get("assets") or []:
@@ -122,10 +123,12 @@ def normalize(data):
             if "setup" in name or "install" in name or "安装" in name:
                 url, sha = link, digest
                 break
-            if not fallback:
-                fallback, fallback_sha = link, digest
+            candidates.append((int(asset.get("size") or 0), link, digest))
+        if not url and candidates:
+            candidates.sort(key=lambda item: -item[0])
+            url, sha = candidates[0][1], candidates[0][2]
         if not url:
-            url, sha = (fallback or last), (fallback_sha or last_sha)
+            url, sha = last, last_sha
         return {
             "version": str(data.get("tag_name")).strip(),
             "notes": str(data.get("body") or "").strip(),
