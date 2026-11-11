@@ -18,16 +18,18 @@ MAX_BODY = 4 * 1024 * 1024      # 单次请求体上限，防止内存被撑爆
 API_PREFIX = "/api/"
 COVER_PREFIX = "/covers/"
 SNIPPET = '<script>window.__TOKEN__="{token}";</script>'
+VERSION_TOKEN = "{{APP_VERSION}}"   # index.html 里的版本占位符，服务端填真值
 
 
 class ApiServer:
     """起一个只给本机用的 HTTP 服务。``start()`` 返回自己，方便链式调用。"""
 
-    def __init__(self, api, web_root, host="127.0.0.1", cover_root=None):
+    def __init__(self, api, web_root, host="127.0.0.1", cover_root=None, version=""):
         self.api = api
         self.web_root = Path(web_root)
         self.cover_root = Path(cover_root) if cover_root else None
         self.host = host
+        self.version = str(version or "")
         self.port = 0
         self.token = secrets.token_urlsafe(24)
         self._httpd = None
@@ -180,6 +182,8 @@ class ApiServer:
                     html = html[:at + 6] + "\n" + marker + html[at + 6:]
                 else:
                     html = marker + html
+                # 版本号在服务端就填好：脚本没跑起来也不会停在占位符上
+                html = html.replace(VERSION_TOKEN, server.version)
                 self._send(200, html, "text/html; charset=utf-8")
 
             def _file(self, target):

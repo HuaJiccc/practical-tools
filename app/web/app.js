@@ -415,6 +415,9 @@
     }
 
     state.boot = res;
+    // 版本号一拿到就写界面：后面哪段初始化出问题，也不会让它停在占位符上
+    if ($('#appVersion')) $('#appVersion').textContent = res.version || '';
+    if ($('#aboutVersionBadge')) $('#aboutVersionBadge').textContent = res.version ? `v${res.version}` : '';
     state.settings = res.settings || {};
     adoptPrefs(res.ui_prefs);
     seedPrefs();
@@ -5809,7 +5812,7 @@
       $('#exportPath').textContent = state.exportsDir;
       $('#exportPath').title = state.exportsDir;
     }
-    if ($('#appVersion')) $('#appVersion').textContent = (state.boot && state.boot.version) || '2.0.0';
+    if ($('#appVersion')) $('#appVersion').textContent = (state.boot && state.boot.version) || '';
     if ($('#provider')) $('#provider').value = s.provider || 'auto';
     if ($('#dstLang')) $('#dstLang').value = s.target_lang || 'zh-Hans';
     if ($('#srcLang')) $('#srcLang').value = s.source_lang || 'auto';
@@ -6086,6 +6089,19 @@
     }
     if ($('#checkUpdate')) {
       $('#checkUpdate').onclick = () => runCheckUpdate();
+    }
+    if ($('#feedbackBug')) {
+      $('#feedbackBug').onclick = async () => {
+        const btn = $('#feedbackBug');
+        btn.disabled = true;
+        const res = await api('feedback_report');
+        btn.disabled = false;
+        if (res && res.ok) {
+          toast(res.copied ? '已打开反馈页，运行信息也复制好了' : '已打开反馈页', 'ok', 3200);
+        } else {
+          toast((res && res.error) || '打开反馈页失败', 'err', 4000);
+        }
+      };
     }
     if ($('#openGuide')) {
       $('#openGuide').onclick = async () => {

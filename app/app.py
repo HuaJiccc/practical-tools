@@ -52,7 +52,7 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 APP_NAME = "实用工具"
 APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
@@ -68,17 +68,15 @@ UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
 UPDATE_PLACEHOLDER = "your-name/practical-tools"
 
 # 关于页展示的本版更新说明（跟 VERSION 一起改）
-RELEASE_NOTES = """1.0.2 更新体验修复
-· 修掉「下载完装不上」：以前安装过程完全静默，装完也不会重开程序，看着像失败了
-· 现在静默安装完成后会自动重新打开程序，装好即可用
-· 安装过程加了兜底：文件被占用时强制关闭旧进程，避免后台装到一半退出
-· 安装日志留在系统临时目录，出问题可以查"""
+RELEASE_NOTES = """1.0.3 版本显示与反馈
+· 修掉「换了数据目录之后版本号退回旧版」：界面上的版本号由程序直接写入，不再先显示占位数字
+· 关于页新增「反馈问题」，点一下就把运行信息填进反馈页面，同时复制一份到剪贴板
+· 反馈内容自动带上版本、系统、数据目录等信息，省得手描述"""
 
-RELEASE_NOTES_EN = """1.0.2 update-flow fix
-- Fixed "downloads but seems not to install": the silent install never reopened the app
-- The app now reopens automatically once a silent install finishes
-- The installer force-closes a lingering old process so the files are never locked
-- Install logs are kept in the temp folder for troubleshooting"""
+RELEASE_NOTES_EN = """1.0.3 version display and feedback
+- Fixed the version label falling back to an old number after changing the data folder
+- Added "Report a bug" in About: opens the feedback page with diagnostics already filled in
+- The report carries version, system and data folder automatically"""
 
 
 def _rebrand_runtime():
@@ -977,6 +975,63 @@ class UiApi:
             return {"ok": False, "error": f"打开浏览器失败：{exc}"}
         return {"ok": True, "url": target}
 
+    def feedback_report(self, note=""):
+        """反馈问题：把运行信息填进仓库的 Issue 页面，同时留一份在剪贴板。
+
+        打不开浏览器（没装默认浏览器、网断了）也不算白点：正文已经复制好了，
+        贴到任何地方都能用。
+        """
+        import urllib.parse
+
+        prefs = self._prefs.all() if self._prefs else {}
+        en = str(prefs.get("language") or "zh").lower().startswith("en")
+        try:
+            diag = str((self.diag_info() or {}).get("text") or "")
+        except Exception:  # noqa: BLE001 - 拿不到运行信息也要能反馈
+            diag = ""
+
+        lines = [
+            "What happened:" if en else "问题描述：",
+            ("(what you did, what you expected, what actually happened - a screenshot helps)"
+             if en else "（补充一下：做了什么、期望看到什么、实际发生了什么，有截图更好）"),
+            "",
+            "Diagnostics:" if en else "运行信息：",
+            diag,
+            "",
+            f"-- {APP_NAME} v{VERSION}",
+        ]
+        body = "\n".join(line for line in lines if line is not None)[:1500]
+        title = (f"[Bug] {APP_NAME} v{VERSION}" if en else f"[反馈] {APP_NAME} v{VERSION}")
+
+        copied = False
+        try:
+            copied = bool(self._api.clipboard_write(body).get("ok"))
+        except Exception:  # noqa: BLE001
+            copied = False
+
+        repo = "" if UPDATE_PLACEHOLDER in UPDATE_REPO else UPDATE_REPO
+        if not repo:
+            return {
+                "ok": False,
+                "copied": copied,
+                "error": "还没配置反馈地址，运行信息已经复制到剪贴板，可以贴给作者",
+            }
+        url = f"https://github.com/{repo}/issues/new?" + urllib.parse.urlencode(
+            {"title": title, "body": body}
+        )
+        try:
+            import webbrowser
+
+            webbrowser.open(url)
+        except Exception as exc:  # noqa: BLE001
+            return {
+                "ok": False,
+                "copied": copied,
+                "error": f"打开浏览器失败：{exc}",
+                "url": url,
+            }
+        return {"ok": True, "url": url, "copied": copied}
+
     def _schedule_exit(self):
         """安装程序启动后本进程要让位，否则文件被占用装不上去。
 
@@ -1378,7 +1433,7 @@ def build_window():
     exports = root / "exports"
     tray_host = TrayHost(None, prefs)
     ui = UiApi(api, plan, note_meta, focus, countdown, mood, chart, exports, prefs, tray_host=tray_host)
-    server = ApiServer(ui, web_dir()).start()
+    server = ApiServer(ui, web_dir(), version=VERSION).start()
 
     width = int(settings.get("window_width") or 1240)
     height = int(settings.get("window_height") or 820)
