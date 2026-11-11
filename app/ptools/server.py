@@ -20,6 +20,25 @@ COVER_PREFIX = "/covers/"
 SNIPPET = '<script>window.__TOKEN__="{token}";</script>'
 VERSION_TOKEN = "{{APP_VERSION}}"   # index.html 里的版本占位符，服务端填真值
 
+# 界面文件缺失时的兜底页面（理论上不该出现，但真出现时别让用户对着白屏猜）
+MISSING_PAGE = """<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>界面文件缺失</title>
+<style>
+ html,body{margin:0;height:100%;background:#f3f4f6;color:#1f2937;
+   font:15px/1.7 "Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif}
+ .box{max-width:520px;margin:0 auto;padding:72px 28px}
+ h1{font-size:19px;margin:0 0 14px}
+ p{margin:0 0 10px;color:#4b5563}
+ code{background:#e5e7eb;border-radius:6px;padding:1px 6px;font-size:13px}
+</style></head>
+<body><div class="box">
+ <h1>界面文件没有加载出来</h1>
+ <p>程序本身还在运行，但它需要的页面文件找不到了。通常是这次启动前，系统的临时目录被清理过。</p>
+ <p>处理办法：把这个窗口关掉，重新从开始菜单或桌面图标打开一次。</p>
+ <p>如果反复出现，请到设置 → 关于 → 反馈问题，把运行信息一起发过去。</p>
+</div></body></html>"""
+
 
 class ApiServer:
     """起一个只给本机用的 HTTP 服务。``start()`` 返回自己，方便链式调用。"""
@@ -167,7 +186,9 @@ class ApiServer:
             def _index(self):
                 target = server._resolve(server.web_root, "index.html")
                 if not target:
-                    self._send(404, "not found", "text/plain; charset=utf-8")
+                    # 界面文件没了（解包目录被清理等）：给一页能看懂的说明，
+                    # 总比一个只有 "not found" 的白窗口强。
+                    self._send(200, MISSING_PAGE, "text/html; charset=utf-8")
                     return
                 try:
                     html = target.read_text(encoding="utf-8")

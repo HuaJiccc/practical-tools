@@ -52,7 +52,7 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 APP_NAME = "实用工具"
 APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
@@ -68,15 +68,17 @@ UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
 UPDATE_PLACEHOLDER = "your-name/practical-tools"
 
 # 关于页展示的本版更新说明（跟 VERSION 一起改）
-RELEASE_NOTES = """1.0.3 版本显示与反馈
-· 修掉「换了数据目录之后版本号退回旧版」：界面上的版本号由程序直接写入，不再先显示占位数字
-· 关于页新增「反馈问题」，点一下就把运行信息填进反馈页面，同时复制一份到剪贴板
-· 反馈内容自动带上版本、系统、数据目录等信息，省得手描述"""
+RELEASE_NOTES = """1.0.4 重启与升级修复
+· 修掉「改完数据目录点重启，只剩一个空白窗口」：重启时新进程会重新解包界面文件
+· 修掉「更新装到了别的目录」：静默更新现在原地覆盖，安装器默认也回到上次装的位置
+· 运行信息里加了「程序目录」，一眼能看到程序到底从哪个文件夹启动
+· 界面文件真丢了会给出中文说明和处理办法，不再只显示一行 not found"""
 
-RELEASE_NOTES_EN = """1.0.3 version display and feedback
-- Fixed the version label falling back to an old number after changing the data folder
-- Added "Report a bug" in About: opens the feedback page with diagnostics already filled in
-- The report carries version, system and data folder automatically"""
+RELEASE_NOTES_EN = """1.0.4 restart and upgrade fixes
+- Fixed the blank window after changing the data folder and restarting
+- Fixed updates landing in a different folder: the silent update now overwrites in place
+- Diagnostics now show the program folder, so you always know which copy is running
+- A missing UI file now shows a readable explanation instead of a bare not-found line"""
 
 
 def _rebrand_runtime():
@@ -794,10 +796,19 @@ class UiApi:
             args = [sys.executable]
         else:
             args = [sys.executable, str(BASE_DIR / "app.py")]
+        # 打包成单文件后，启动器把「解包目录」放在环境变量里传给子进程。这里再启动
+        # 自己时必须把手上的痕迹抹掉：否则新进程会沿用旧进程的解包目录，而那个目录
+        # 在旧进程退出时会被删掉，新版就只剩一个满屏 "not found" 的空窗口。
+        env = dict(os.environ)
+        for key in [k for k in env
+                    if k.startswith("_PYI_") or k.upper() in ("_MEIPASS", "_MEIPASS2")]:
+            env.pop(key, None)
+        env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"  # 让启动器重新解包
         try:
             subprocess.Popen(
                 args,
                 cwd=str(app_dir()),
+                env=env,
                 creationflags=0x00000008,  # DETACHED_PROCESS，新进程不跟着一起死
                 close_fds=True,
             )
@@ -881,6 +892,7 @@ class UiApi:
              ("packaged" if en else "打包版") if getattr(sys, "frozen", False) else ("source" if en else "源码")],
             ["Data folder" if en else "数据目录", str(root)],
             ["Data size" if en else "数据占用", f"{total / 1048576:.2f} MB"],
+            ["Program folder" if en else "程序目录", str(app_dir())],
             ["Channel" if en else "翻译通道", settings.get("provider") or "auto"],
             ["AI API" if en else "AI 接口", ai],
             ["Reminders" if en else "待办提醒",

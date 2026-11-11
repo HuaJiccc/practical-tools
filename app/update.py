@@ -240,6 +240,8 @@ def launch(path):
     # /FORCECLOSEAPPLICATIONS     关不掉就强制关；安静模式没有对话框可点，只能这样兜底
     # /NORESTART                  不重启系统
     # /LOG                        在临时目录留一份安装日志，出问题能查
+    # /DIR="..."                  原地覆盖。静默安装不走向导，不指定就会装到默认目录，
+    #                             结果是新旧两个版本并存，用户点的还是旧图标
     args = [
         str(path),
         "/SILENT",
@@ -249,6 +251,12 @@ def launch(path):
         "/NORESTART",
         "/LOG",
     ]
+    if getattr(sys, "frozen", False):
+        here = os.path.dirname(os.path.abspath(sys.executable))
+        if here:
+            # 不能写成 /DIR="路径"：subprocess 会把内层引号转义成 \"，安装程序
+            # 反而把引号当成路径的一部分。整只参数交给 subprocess 去加引号。
+            args.append(f"/DIR={here}")
     creation = 0
     if sys.platform.startswith("win"):
         creation = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
