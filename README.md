@@ -5,6 +5,8 @@
 [![协议](https://img.shields.io/github/license/HuaJiccc/practical-tools)](LICENSE)
 ![平台](https://img.shields.io/badge/%E5%B9%B3%E5%8F%B0-Windows%2010%20%7C%2011-0078D4)
 
+简体中文 | [English](README.en.md)
+
 一个运行在 Windows 上的本地工具集合。翻译、记事、待办、时间管理、图片处理等 13 项功能
 整合在同一个窗口内，数据保存在本机，无需注册账号，也不会上传。
 
