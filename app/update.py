@@ -97,18 +97,41 @@ def normalize(data):
         }
 
     if data.get("tag_name"):
+        # GitHub 的 assets 是倒序返回的（最后上传的排前面），不能直接取第一个：
+        # release 里通常同时躺着安装包和免安装版，取错就会「下载了但没装上」。
+        # 先按名字认安装包，认不出来再退回第一个可下载的 exe/msi。
         url = ""
+        sha = ""
+        fallback = ""
+        fallback_sha = ""
+        last = ""
+        last_sha = ""
         for asset in data.get("assets") or []:
             name = str(asset.get("name") or "").lower()
-            if name.endswith((".exe", ".msi")):
-                url = str(asset.get("browser_download_url") or "")
+            if not name.endswith((".exe", ".msi")):
+                continue
+            link = str(asset.get("browser_download_url") or "").strip()
+            if not link:
+                continue
+            digest = str(asset.get("digest") or "").strip().lower()
+            digest = digest[len("sha256:"):] if digest.startswith("sha256:") else ""
+            if "portable" in name or "免安装" in name:
+                if not last:
+                    last, last_sha = link, digest
+                continue
+            if "setup" in name or "install" in name or "安装" in name:
+                url, sha = link, digest
                 break
+            if not fallback:
+                fallback, fallback_sha = link, digest
+        if not url:
+            url, sha = (fallback or last), (fallback_sha or last_sha)
         return {
             "version": str(data.get("tag_name")).strip(),
             "notes": str(data.get("body") or "").strip(),
             "url": url,
             "page": str(data.get("html_url") or "").strip(),
-            "sha256": "",
+            "sha256": sha,
         }
 
     raise UpdateError("更新源里没有版本信息")
