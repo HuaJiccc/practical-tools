@@ -197,7 +197,9 @@ directory are configurable in Settings → Data.
 
 ## Contributing
 
-Bugs and feature requests go to [Issues](../../issues); pull requests are welcome. If you touch the
+Bugs and feature requests go to [Issues](../../issues); pull requests are welcome. In the app,
+Settings → About → "Report a bug" opens the issue form with version, system and data folder already
+filled in, and copies the same text to the clipboard as a backup. If you touch the
 core (`app/ptools/`), run the differential tests first to make sure existing behaviour still matches:
 
 ```bash

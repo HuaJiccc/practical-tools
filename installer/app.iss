@@ -11,7 +11,7 @@
 ; ============================================================
 
 #define AppName "实用工具"
-#define AppVersion "1.0.2"
+#define AppVersion "1.0.3"
 #define AppExe "实用工具.exe"
 #define AppAuthor "H.J."
 #define AppId "{{7C4A1F52-9E3B-4F0A-9D21-2B77C5E8A641}"
