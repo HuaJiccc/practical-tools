@@ -21,7 +21,7 @@ from .translate import (PROVIDER_LABELS, PROVIDER_ORDER, TTS_VOICE, Engine,
                         TranslateError, tts_url)
 
 APP_NAME = "个人工具"
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 SW_MAXIMIZE = 3
 SW_RESTORE = 9
