@@ -11,10 +11,11 @@
 ; ============================================================
 
 #define AppName "实用工具"
-#define AppVersion "1.0.3"
+#define AppVersion "1.0.4"
 #define AppExe "实用工具.exe"
 #define AppAuthor "H.J."
-#define AppId "{{7C4A1F52-9E3B-4F0A-9D21-2B77C5E8A641}"
+#define AppGuid "7C4A1F52-9E3B-4F0A-9D21-2B77C5E8A641"
+#define AppId "{{" + AppGuid + "}"
 
 [Setup]
 AppId={#AppId}
@@ -24,7 +25,7 @@ AppVerName={#AppName} {#AppVersion}
 AppPublisher={#AppAuthor}
 AppCopyright=© 2026 {#AppAuthor}
 VersionInfoVersion={#AppVersion}
-DefaultDirName={autopf}\{#AppName}
+DefaultDirName={code:DefaultInstallDir}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 LicenseFile=许可协议.txt
@@ -79,6 +80,33 @@ Filename: "{app}\{#AppExe}"; Description: "立即启动 {#AppName}"; Flags: nowa
 Filename: "{app}\{#AppExe}"; Flags: nowait skipifnotsilent
 
 [Code]
+{ ---------- 升级安装装回原位置 ----------
+  静默安装不走目录选择页，Inno 不会去读上一次的安装路径，于是每次升级都
+  落到默认的 %LOCALAPPDATA%\Programs 下，旧版本还留在原处 —— 用户点旧图标
+  就还是老版本。这里手动读注册表里上一次的安装位置，让升级原地覆盖。 }
+function PreviousInstallDir: String;
+var
+  Key, Value: String;
+begin
+  Result := '';
+  { 键名形如 GUID_is1，两边的大括号用 Chr 拼，免得被当成 Inno 常量或注释 }
+  Key := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\' +
+         Chr(123) + '{#AppGuid}' + Chr(125) + '_is1';
+  if RegQueryStringValue(HKEY_CURRENT_USER, Key, 'InstallLocation', Value) then
+  begin
+    Value := RemoveBackslashUnlessRoot(Trim(Value));
+    if (Value <> '') and FileExists(AddBackslash(Value) + '{#AppExe}') then
+      Result := Value;
+  end;
+end;
+
+function DefaultInstallDir(Param: String): String;
+begin
+  Result := PreviousInstallDir;
+  if Result = '' then
+    Result := ExpandConstant('{autopf}\{#AppName}');
+end;
+
 { ---------- WebView2：程序用它渲染界面，Win10/11 一般已预装 ---------- }
 function WebView2Version: String;
 var
