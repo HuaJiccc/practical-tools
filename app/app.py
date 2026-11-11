@@ -866,21 +866,32 @@ class UiApi:
             with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key) as handle:
                 edge, _ = winreg.QueryValueEx(handle, "pv")
         except Exception:  # noqa: BLE001
-            edge = "未读取到"
+            edge = ""
+        lang = str((self._prefs.all() if self._prefs else {}).get("language") or "zh").lower()
+        en = lang.startswith("en")
+        ai_model = (settings.get("ai_model") or "").strip()
+        ai = (
+            (f"configured {ai_model}".strip() if en else f"已配置 {ai_model}".strip())
+            if (settings.get("ai_api_key") or "").strip()
+            else ("not configured" if en else "未配置")
+        )
         items = [
-            ["版本", VERSION],
-            ["作者", AUTHOR],
-            ["系统", f"{platform.system()} {platform.release()} ({platform.version()})"],
+            ["Version" if en else "版本", VERSION],
+            ["Author" if en else "作者", AUTHOR],
+            ["System" if en else "系统", f"{platform.system()} {platform.release()} ({platform.version()})"],
             ["Python", f"{platform.python_version()} {platform.machine()}"],
-            ["WebView2", edge],
-            ["运行方式", "打包版" if getattr(sys, "frozen", False) else "源码"],
-            ["数据目录", str(root)],
-            ["数据占用", f"{total / 1048576:.2f} MB"],
-            ["翻译通道", settings.get("provider") or "auto"],
-            ["AI 接口", ("已配置 " + (settings.get("ai_model") or "")).strip() if (settings.get("ai_api_key") or "").strip() else "未配置"],
-            ["待办提醒", "开" if settings.get("reminders_enabled", True) else "关"],
+            ["WebView2", edge or ("not detected" if en else "未读取到")],
+            ["Build" if en else "运行方式",
+             ("packaged" if en else "打包版") if getattr(sys, "frozen", False) else ("source" if en else "源码")],
+            ["Data folder" if en else "数据目录", str(root)],
+            ["Data size" if en else "数据占用", f"{total / 1048576:.2f} MB"],
+            ["Channel" if en else "翻译通道", settings.get("provider") or "auto"],
+            ["AI API" if en else "AI 接口", ai],
+            ["Reminders" if en else "待办提醒",
+             ("on" if en else "开") if settings.get("reminders_enabled", True) else ("off" if en else "关")],
         ]
-        text = "\n".join(f"{name}：{value}" for name, value in items)
+        sep = ": " if en else "："
+        text = "\n".join(f"{name}{sep}{value}" for name, value in items)
         return {"ok": True, "items": items, "text": text}
 
     # ---- v1.0：关于页、检查更新、原地安装 ----
