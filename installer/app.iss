@@ -11,7 +11,7 @@
 ; ============================================================
 
 #define AppName "实用工具"
-#define AppVersion "1.0.1"
+#define AppVersion "1.0.2"
 #define AppExe "实用工具.exe"
 #define AppAuthor "H.J."
 #define AppId "{{7C4A1F52-9E3B-4F0A-9D21-2B77C5E8A641}"
@@ -72,7 +72,11 @@ Name: "{autoprograms}\卸载 {#AppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Run]
+; 普通安装：完成页给个勾选框由用户决定
 Filename: "{app}\{#AppExe}"; Description: "立即启动 {#AppName}"; Flags: nowait postinstall skipifsilent
+; 静默安装（程序内「立即更新」走这条路）：装完直接重开，否则用户只看到窗口一闪，
+; 分不清是装好了还是崩了。skipifnotsilent 让两条互斥，不会开两个。
+Filename: "{app}\{#AppExe}"; Flags: nowait skipifnotsilent
 
 [Code]
 { ---------- WebView2：程序用它渲染界面，Win10/11 一般已预装 ---------- }

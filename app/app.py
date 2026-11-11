@@ -52,7 +52,7 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 APP_NAME = "实用工具"
 APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
@@ -68,15 +68,17 @@ UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
 UPDATE_PLACEHOLDER = "your-name/practical-tools"
 
 # 关于页展示的本版更新说明（跟 VERSION 一起改）
-RELEASE_NOTES = """1.0.1 修订版
-· 英文界面补全：顶部搜索按钮、关于页运行信息不再夹带中文
-· 数据占用等运行信息的字段与取值随界面语言切换
-· 文档更新：英文说明配英文界面截图"""
+RELEASE_NOTES = """1.0.2 更新体验修复
+· 修掉「下载完装不上」：以前安装过程完全静默，装完也不会重开程序，看着像失败了
+· 现在静默安装完成后会自动重新打开程序，装好即可用
+· 安装过程加了兜底：文件被占用时强制关闭旧进程，避免后台装到一半退出
+· 安装日志留在系统临时目录，出问题可以查"""
 
-RELEASE_NOTES_EN = """1.0.1 patch release
-- English UI completed: the search button and runtime info no longer show Chinese
-- Runtime info labels and values follow the interface language
-- Docs refreshed: the English README now uses English screenshots"""
+RELEASE_NOTES_EN = """1.0.2 update-flow fix
+- Fixed "downloads but seems not to install": the silent install never reopened the app
+- The app now reopens automatically once a silent install finishes
+- The installer force-closes a lingering old process so the files are never locked
+- Install logs are kept in the temp folder for troubleshooting"""
 
 
 def _rebrand_runtime():
@@ -976,7 +978,11 @@ class UiApi:
         return {"ok": True, "url": target}
 
     def _schedule_exit(self):
-        """安装程序启动后本进程要让位，否则文件被占用装不上去。"""
+        """安装程序启动后本进程要让位，否则文件被占用装不上去。
+
+        留 2.5 秒是给界面把「即将关闭并安装」那句话显示完 —— 退出太快
+        用户只看到窗口消失，会以为程序崩了。
+        """
 
         def bye():
             host = self._tray_host
@@ -987,7 +993,7 @@ class UiApi:
                     pass
             os._exit(0)
 
-        threading.Timer(1.2, bye).start()
+        threading.Timer(2.5, bye).start()
 
 
     def save_settings(self, patch):

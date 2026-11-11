@@ -234,7 +234,21 @@ def launch(path):
     """启动安装包。安装程序自己会接管后续，本进程随后退出。"""
     if not os.path.isfile(path):
         raise UpdateError("安装包不存在，可能已被清理")
-    args = [str(path), "/SILENT", "/CLOSEAPPLICATIONS", "/NORESTART"]
+    # /SILENT                     显示进度窗口但跳过向导，不打断用户
+    # /SUPPRESSMSGBOXES           万一会弹提示框也自动答，否则无人值守时卡死
+    # /CLOSEAPPLICATIONS          文件被占用时先尝试正常关闭
+    # /FORCECLOSEAPPLICATIONS     关不掉就强制关；安静模式没有对话框可点，只能这样兜底
+    # /NORESTART                  不重启系统
+    # /LOG                        在临时目录留一份安装日志，出问题能查
+    args = [
+        str(path),
+        "/SILENT",
+        "/SUPPRESSMSGBOXES",
+        "/CLOSEAPPLICATIONS",
+        "/FORCECLOSEAPPLICATIONS",
+        "/NORESTART",
+        "/LOG",
+    ]
     creation = 0
     if sys.platform.startswith("win"):
         creation = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
