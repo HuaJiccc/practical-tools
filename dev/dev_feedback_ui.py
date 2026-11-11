@@ -1,7 +1,7 @@
-"""1.0.3 自测：关于页版本号 + 反馈入口。
+"""自测：关于页版本号 + 反馈入口。
 
 - 服务端返回的页面里，版本号已经是真值（不再有占位符）
-- 界面显示 1.0.3
+- 界面显示的版本与 app.py 里的 VERSION 一致
 - 点「反馈问题」会打开带标题/正文的反馈地址，同时把正文写进剪贴板
 """
 import json
@@ -28,6 +28,8 @@ from dev_image_stress import capture, find_hwnd  # noqa: E402
 os.environ["PERSONALTOOLS_DATA"] = str(DATA)
 
 import app as appmod  # noqa: E402
+
+VERSION = appmod.VERSION
 
 opened = []
 webbrowser.open = lambda url, *a, **k: opened.append(url) or True
@@ -70,9 +72,9 @@ def main():
             version = (js("(document.querySelector('#appVersion')||{}).textContent || ''") or "").strip()
             badge = (js("(document.querySelector('#aboutVersionBadge')||{}).textContent || ''") or "").strip()
             notes = (js("(document.querySelector('#releaseNotes')||{}).innerText || ''") or "").strip()
-            check("关于页版本号是 1.0.3", version == "1.0.3", version)
-            check("更新说明徽章是 v1.0.3", badge == "v1.0.3", badge)
-            check("更新说明已刷新", "1.0.3" in notes, notes[:40])
+            check(f"关于页版本号是 {VERSION}", version == VERSION, version)
+            check(f"更新说明徽章是 v{VERSION}", badge == f"v{VERSION}", badge)
+            check("更新说明已刷新", VERSION in notes, notes[:40])
             check("反馈按钮存在", js("!!document.querySelector('#feedbackBug')") is True)
 
             js("document.querySelector('#feedbackBug').click()")
@@ -86,7 +88,7 @@ def main():
                 q = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
                 title = (q.get("title") or [""])[0]
                 body = (q.get("body") or [""])[0]
-                check("标题带版本号", "1.0.3" in title, title)
+                check("标题带版本号", VERSION in title, title)
                 check("正文带运行信息", "版本" in body and "数据目录" in body, body[:80].replace("\n", " | "))
                 check("正文长度合理", 80 < len(body) <= 1600, str(len(body)))
 
