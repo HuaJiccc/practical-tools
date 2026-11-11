@@ -95,7 +95,7 @@ python -m PyInstaller --noconfirm --clean 实用工具.spec
 
 ```bash
 ISCC.exe installer\app.iss
-# 产物：dist-installer\实用工具-1.0.0-安装程序.exe（约 15 MB）
+# 产物：dist-installer\实用工具-<版本>-安装程序.exe（约 15 MB）
 ```
 
 设计上的几条约束，改脚本前先看：
@@ -470,10 +470,11 @@ ISCC.exe installer\app.iss
 安装包在 `dist-installer/`，附上 sha256：
 
 ```bash
-certutil -hashfile "dist-installer\实用工具-1.0.0-安装程序.exe" SHA256
+certutil -hashfile "dist-installer\实用工具-<版本>-安装程序.exe" SHA256
 ```
 
-**4. 发 Release**：tag 用 `v1.0.0`，附件传安装包与免安装的 `实用工具.exe`，
+**4. 发 Release**：tag 用 `v<版本>`（与 `app/app.py` 的 `VERSION`、`installer/app.iss` 的
+`AppVersion` 三处一致），附件传安装包与免安装的 `实用工具.exe`，
 正文直接贴 `CHANGELOG.md` 里对应那节。检查更新走的是
 `https://api.github.com/repos/<仓库>/releases/latest`，所以 tag 必须存在、附件必须挂在
 release 上，光 push tag 不够。

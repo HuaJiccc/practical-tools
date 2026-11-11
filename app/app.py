@@ -52,7 +52,7 @@ from uistore import (  # noqa: E402
     _snippet,
 )
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 APP_NAME = "实用工具"
 APP_NAME_EN = "Utility Toolkit"
 APP_ID = "PracticalTools.DesktopApp"
@@ -68,19 +68,15 @@ UPDATE_PAGE = f"https://github.com/{UPDATE_REPO}/releases"
 UPDATE_PLACEHOLDER = "your-name/practical-tools"
 
 # 关于页展示的本版更新说明（跟 VERSION 一起改）
-RELEASE_NOTES = """1.0 首个正式版
-· 界面支持中英文切换，改完立即生效，重启也记得
-· 新增系统托盘：最小化或关闭可收进托盘，双击图标回到窗口
-· 关于页显示版本号、本次更新内容，并支持检查更新
-· 检测到新版本可原地下载安装，也可跳转到发布页手动下载
-· 数据目录与图片保存目录都能自定义，默认位置人人可用"""
+RELEASE_NOTES = """1.0.1 修订版
+· 英文界面补全：顶部搜索按钮、关于页运行信息不再夹带中文
+· 数据占用等运行信息的字段与取值随界面语言切换
+· 文档更新：英文说明配英文界面截图"""
 
-RELEASE_NOTES_EN = """1.0 first stable release
-- Chinese and English interface, switches instantly and is remembered
-- System tray: minimize or close to tray, double-click the icon to return
-- About page shows the version, what changed, and a manual update check
-- Updates can be downloaded and installed in place, or opened on the release page
-- Data folder and image folder are configurable, with sane defaults"""
+RELEASE_NOTES_EN = """1.0.1 patch release
+- English UI completed: the search button and runtime info no longer show Chinese
+- Runtime info labels and values follow the interface language
+- Docs refreshed: the English README now uses English screenshots"""
 
 
 def _rebrand_runtime():
