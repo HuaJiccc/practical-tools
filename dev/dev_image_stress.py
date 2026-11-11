@@ -81,7 +81,7 @@ def find_hwnd(pid):
             if n:
                 buf = ctypes.create_unicode_buffer(n + 1)
                 user32.GetWindowTextW(hwnd, buf, n + 1)
-                if "个人工具" in buf.value:
+                if any(name in buf.value for name in ("个人工具", "实用工具")):
                     result.append(hwnd)
         return True
 
