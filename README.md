@@ -1,5 +1,10 @@
 # 实用工具 · Utility Toolkit
 
+[![最新版本](https://img.shields.io/github/v/release/HuaJiccc/practical-tools)](https://github.com/HuaJiccc/practical-tools/releases/latest)
+[![下载量](https://img.shields.io/github/downloads/HuaJiccc/practical-tools/total)](https://github.com/HuaJiccc/practical-tools/releases)
+[![协议](https://img.shields.io/github/license/HuaJiccc/practical-tools)](LICENSE)
+![平台](https://img.shields.io/badge/%E5%B9%B3%E5%8F%B0-Windows%2010%20%7C%2011-0078D4)
+
 一个运行在 Windows 上的本地工具集合。翻译、记事、待办、时间管理、图片处理等 13 项功能
 整合在同一个窗口内，数据保存在本机，无需注册账号，也不会上传。
 
@@ -12,7 +17,8 @@ no account, no cloud, everything stays on your disk.
 
 ## 下载与安装
 
-到 [Releases](../../releases) 下载 `实用工具-1.0.0-安装程序.exe`，双击按向导完成安装。
+到 [Releases](../../releases/latest) 下载最新版本。文件名以 `-Setup.exe` 结尾的是安装程序，
+双击按向导完成；以 `-Portable.exe` 结尾的是免安装版，单个文件，双击就能运行。
 
 | 项目 | 说明 |
 |---|---|
@@ -23,8 +29,8 @@ no account, no cloud, everything stays on your disk.
 | 数据位置 | `%LOCALAPPDATA%\实用工具\data`，卸载时保留，重新安装后仍可继续使用 |
 | 卸载 | 「设置 → 应用 → 已安装的应用」或开始菜单中的「卸载 实用工具」 |
 
-也提供免安装的 `实用工具.exe`：放入任意文件夹双击运行，数据存放在它旁边的 `data` 里，
-整个文件夹复制即可换机器。
+也提供免安装版（Release 里 `-Portable.exe` 那个）：放入任意文件夹双击运行，数据存放在
+它旁边的 `data` 里，整个文件夹复制即可换机器。
 
 ## 功能
 
